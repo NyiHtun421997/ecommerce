@@ -1,0 +1,81 @@
+
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Search Product</title>
+<style>
+	#search_bar {
+		display:inline;
+	}
+	#productName {
+		width:460px;
+		height:30px;
+		margin:20px;
+	}
+    #result_table {
+        border-collapse: collapse;
+        text-align: center;
+        border:2px solid black;
+    }
+    th,td {
+        border:2px solid black;
+    }
+	button {
+		width:60px;
+		height:30px;
+	}
+</style>
+</head>
+<body>
+
+	<header>
+		<h1 style="font-size:35px">商品検索</h1>
+	</header>
+	
+	<main>
+		<section id="search_bar">
+		<form action="/Ecommerce/search" method="get">
+			<label for="productName" style="font-size:28px">商品名</label>
+			<input type="text" name="productName" id="productName">
+			<button type="submit">検索</button>
+		</section>	
+		
+		<section id="table">
+			<table id="result_table">
+				<thead>
+					<tr>
+						<th height="40" width="110">商品コード</th><th width="320">商品名</th><th width="100">単価</th><th width="120">操作</th>
+					</tr>
+				</thead>
+				
+				<tbody>
+					<tr>
+                        <td height="40">1</td>
+                        <td>2</td>
+                        <td>3</td>
+                        <td>4</td>
+                    </tr>
+
+                    <tr>
+                        <td>5</td>
+                        <td>6</td>
+                        <td>7</td>
+                        <td>8</td>
+                    </tr>
+
+                    <tr>
+                        <td>9</td>
+                        <td>10</td>
+                        <td>11</td>
+                        <td>12</td>
+                    </tr>
+
+				</tbody>
+			</table>
+		</section>
+	</main>
+
+</body>
+</html>
