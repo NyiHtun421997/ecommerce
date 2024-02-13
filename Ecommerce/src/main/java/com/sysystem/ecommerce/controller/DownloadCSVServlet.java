@@ -53,12 +53,13 @@ public class DownloadCSVServlet extends HttpServlet {
 				String fileName = "商品別売上集計.csv";
 				String encodedFileName = URLEncoder.encode(fileName, "UTF-8");
 
+				response.setCharacterEncoding("UTF-8");
 				response.setContentType("text/csv; charset=UTF-8");
 				response.addHeader("Content-disposition", "attachment; filename=" + encodedFileName);
 
 				// Read the file
 				try (BufferedReader bufferedReader = new BufferedReader(
-						new InputStreamReader(new FileInputStream(filePath + fileName), "UTF-8"));
+						new InputStreamReader(new FileInputStream(filePath + fileName), "SJIS"));
 						PrintWriter out = response.getWriter()) {
 
 					String in;
@@ -77,12 +78,13 @@ public class DownloadCSVServlet extends HttpServlet {
 				String fileName = "指定年月商品別売上集計_" + date + ".csv";
 				String encodedFileName = URLEncoder.encode(fileName, "UTF-8");
 
+				response.setCharacterEncoding("UTF-8");
 				response.setContentType("text/csv; charset=UTF-8");
 				response.addHeader("Content-disposition", "attachment; filename=" + encodedFileName);
 
 				// Read the file
 				try (BufferedReader bufferedReader = new BufferedReader(
-						new InputStreamReader(new FileInputStream(filePath + fileName), "UTF-8"));
+						new InputStreamReader(new FileInputStream(filePath + fileName), "SJIS"));
 						PrintWriter out = response.getWriter()) {
 
 					String in;
