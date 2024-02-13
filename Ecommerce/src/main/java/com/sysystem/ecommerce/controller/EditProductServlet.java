@@ -19,12 +19,11 @@ import com.sysystem.ecommerce.repository.ProductDao;
 public class EditProductServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 
-
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		request.setCharacterEncoding("UTF-8");
 		int productCode = Integer.parseInt((String) request.getParameter("product_code"));
-		String productName = (String)request.getParameter("product_name");
+		String productName = (String) request.getParameter("product_name");
 		request.setAttribute("productCode", productCode);
 		request.setAttribute("productName", productName);
 		RequestDispatcher requestDispatcher = request.getRequestDispatcher("/edit.jsp");
@@ -65,9 +64,12 @@ public class EditProductServlet extends HttpServlet {
 				// ここからこの商品は売上テーブルに関連しているかを検索する
 				try {
 					if (!ProductDao.isProductSold(productCode)) {
-					// 商品が既に売上発生していない場合
+						// 商品が既に売上発生していない場合
 						isEdited = ProductDao.updateProductData(productCode, productName, price);
-						message = "商品の変更が成功しました。";						
+						message = "商品の変更が成功しました。";
+					} else {
+						response.sendError(HttpServletResponse.SC_FORBIDDEN, "既に販売中の商品ですので変更処理が失敗しました。");
+						return;
 					}
 				} catch (SQLException e) {
 					throw new RuntimeException(e.getMessage());
