@@ -279,16 +279,6 @@ public class ProductDao {
 	}
 
 	/**
-	 * 商品名変更
-	 * @param 商品コード、商品名
-	 * @return boolean 編集が成功したかを指す論理値
-	 * @exception SQLException
-	 */
-	public static boolean updateProductName(int productCode, String productName) throws SQLException {
-		return ProductDao.editProductData(true, productCode, productName, 0);
-	}
-
-	/**
 	 * 商品マスタのデータを削除
 	 * @param 商品コード、商品名、単価
 	 * @param 変更か削除かを判定するbooleanが型論理値、商品コード、商品名、単価（削除の場合null）
@@ -312,10 +302,7 @@ public class ProductDao {
 		String editQuery = "UPDATE m_product SET delete_datetime=?,update_datetime=?,version=? WHERE product_code=? AND version=?";
 		// 削除の命令か判定する、falseの場合論理削除のqueryに変更する
 		if (isUpdate) {
-			editQuery = "UPDATE m_product SET product_name=?,price=?,update_datetime=?,version=? WHERE product_code=? AND version=?";
-			// 商品名のみ変更の場合
-			if (price == 0)
-				editQuery = "UPDATE m_product SET product_name=?,update_datetime=?,version=? WHERE product_code=? AND version=?";
+			editQuery = "UPDATE m_product SET product_name=?,price=?,update_datetime=?,version=? WHERE product_code=? AND version=?";		
 		}
 
 		int prevVersion = 0;
@@ -337,22 +324,8 @@ public class ProductDao {
 					throw new SQLException("データベースへの接続の際、問題が発生しました。");
 				}
 
-				if (isUpdate) {
-					// 商品名のみ変更の場合
-					if (price == 0) {
-						// product name
-						editStatement.setString(1, productName);
-						// update datetime
-						String updateDatetime = LocalDate.now()
-								.format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
-						editStatement.setString(2, updateDatetime);
-						// new version
-						editStatement.setInt(3, prevVersion + 1);
-						// product code
-						editStatement.setInt(4, productCode);
-						// previous version
-						editStatement.setInt(5, prevVersion);
-					} else {
+				// 更新処理
+				if (isUpdate) {					
 						// product name
 						editStatement.setString(1, productName);
 						// price
@@ -367,8 +340,8 @@ public class ProductDao {
 						editStatement.setInt(5, productCode);
 						// previous version
 						editStatement.setInt(6, prevVersion);
-					}
 
+				// 削除処理
 				} else {
 					// delete parameters
 					// delete datetime

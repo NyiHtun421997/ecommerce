@@ -46,7 +46,7 @@ public class EditProductServlet extends HttpServlet {
 		// 変更処理をする際入力された値に無効な文字が入っているかチェックする
 		if (edit.equals("update")
 				&& (productName == "" || priceText == ""
-						|| !productName.matches("[\\w\\s]*")
+						|| productName.matches(".*[!@#%^&*()_+=\\[\\]{}|;':\",./<>?~`-].*")
 						|| !priceText.matches("[0-9]+"))) {
 			message = "商品名または価格に無効な値が入力されています。";
 			request.setAttribute("message", message);
@@ -64,15 +64,10 @@ public class EditProductServlet extends HttpServlet {
 				int price = Integer.parseInt(priceText);
 				// ここからこの商品は売上テーブルに関連しているかを検索する
 				try {
-					if (ProductDao.isProductSold(productCode)) {
-						
-						// 既に売上が発生した場合、単価は変更できなく商品名のみ変更可能						
-						isEdited = ProductDao.updateProductName(productCode, productName);
-						message = "商品は既に売上が発生しているため、商品名のみ変更しました。";
-						
-					} else {
+					if (!ProductDao.isProductSold(productCode)) {
+					// 商品が既に売上発生していない場合
 						isEdited = ProductDao.updateProductData(productCode, productName, price);
-						message = "商品の変更が成功しました。";
+						message = "商品の変更が成功しました。";						
 					}
 				} catch (SQLException e) {
 					throw new RuntimeException(e.getMessage());
