@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URLEncoder;
-import java.sql.SQLException;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
@@ -17,6 +16,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.sysystem.ecommerce.exception.CustomException;
 import com.sysystem.ecommerce.repository.SalesDao;
 import com.sysystem.ecommerce.service.SalesManager;
 
@@ -96,7 +96,7 @@ public class DownloadCSVServlet extends HttpServlet {
 				}
 			}
 
-		} catch (SQLException e) {
+		} catch (CustomException e) {
 			throw new RuntimeException(e.getMessage());
 		}
 	}

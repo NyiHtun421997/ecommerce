@@ -1,7 +1,6 @@
 package com.sysystem.ecommerce.controller;
 
 import java.io.IOException;
-import java.sql.SQLException;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -10,7 +9,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.sysystem.ecommerce.repository.ProductDao;
+import com.sysystem.ecommerce.exception.CustomException;
+import com.sysystem.ecommerce.service.ProductManager;
 
 /**
  * Servlet implementation class EditProduct
@@ -37,7 +37,7 @@ public class EditProductServlet extends HttpServlet {
 		String productName = (String) request.getParameter("productName");
 		String priceText = (String) request.getParameter("price");
 		String edit = ((String) request.getParameter("edit"));
-		String message = null;
+		String message = "";
 		boolean isEdited = false;
 		int productCode = Integer.parseInt((String) request.getParameter("productCode"));
 		RequestDispatcher requestDispatcher;
@@ -47,47 +47,34 @@ public class EditProductServlet extends HttpServlet {
 				&& (productName == "" || priceText == ""
 						|| productName.matches(".*[!@#%^&*()_+=\\[\\]{}|;':\",./<>?~`-].*")
 						|| !priceText.matches("[0-9]+"))) {
+			
 			message = "商品名または価格に無効な値が入力されています。";
-			request.setAttribute("message", message);
-			request.setAttribute("isEdited", isEdited);
-			request.setAttribute("productCode", productCode);
-			requestDispatcher = request.getRequestDispatcher("/edit.jsp");
-			requestDispatcher.forward(request, response);
-
+			
 		} else {
-			// ここまで来たら入力値にspecial charactersか空白が入っていない為、編集処理を続ける
-			// 検索ボタンと変更ボタンどっちが押されたかを判定する
-			if (edit.equals("update")) {
+			try {
+				ProductManager productManager = ProductManager.getInstance();
+				// ここまで来たら入力値にspecial charactersか空白が入っていない為、編集処理を続ける
+				// 検索ボタンと変更ボタンどっちが押されたかを判定する
+				if (edit.equals("update")) {
+					// 変更の処理
+					int price = Integer.parseInt(priceText);
+					isEdited = productManager.updateProductData(productCode, productName, price);
+					message = (isEdited) ? "商品の変更が成功しました。" : "既に販売中の商品ですので変更処理が失敗しました。";
 
-				// 変更の処理
-				int price = Integer.parseInt(priceText);
-				// ここからこの商品は売上テーブルに関連しているかを検索する
-				try {
-					if (!ProductDao.isProductSold(productCode)) {
-						// 商品が既に売上発生していない場合
-						isEdited = ProductDao.updateProductData(productCode, productName, price);
-						message = "商品の変更が成功しました。";
-					} else {
-						response.sendError(HttpServletResponse.SC_FORBIDDEN, "既に販売中の商品ですので変更処理が失敗しました。");
-						return;
-					}
-				} catch (SQLException e) {
-					throw new RuntimeException(e.getMessage());
-				}
-			} else {
-				// 削除の処理
-				try {
-					isEdited = ProductDao.deleteProductData(productCode);
+				} else {
+					// 削除の処理
+					isEdited = productManager.deleteProductData(productCode);
 					message = "商品の削除が成功しました。";
-				} catch (SQLException e) {
-					throw new RuntimeException(e.getMessage());
 				}
+				
+			} catch (CustomException e) {
+				throw new RuntimeException(e.getMessage());
 			}
-			request.setAttribute("message", message);
-			request.setAttribute("productCode", productCode);
-			request.setAttribute("isEdited", isEdited);
-			requestDispatcher = request.getRequestDispatcher("/edit.jsp");
-			requestDispatcher.forward(request, response);
 		}
+		request.setAttribute("message", message);
+		request.setAttribute("isEdited", isEdited);
+		request.setAttribute("productCode", productCode);
+		requestDispatcher = request.getRequestDispatcher("/edit.jsp");
+		requestDispatcher.forward(request, response);
 	}
 }

@@ -1,10 +1,10 @@
 package com.sysystem.ecommerce.service;
 
 import java.sql.Date;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.sysystem.ecommerce.exception.CustomException;
 import com.sysystem.ecommerce.model.Product;
 import com.sysystem.ecommerce.model.Sales;
 import com.sysystem.ecommerce.repository.ProductDao;
@@ -106,7 +106,7 @@ public class Tran {
 			// 売上テーブルのデータを全件取得
 			allSales = SalesDao.getAllSalesList();
 
-		} catch (SQLException e) {
+		} catch (CustomException e) {
 			System.out.println(e.getMessage());
 		}
 

@@ -15,6 +15,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sysystem.ecommerce.exception.CustomException;
 import com.sysystem.ecommerce.model.Product;
 import com.sysystem.ecommerce.model.Sales;
 
@@ -48,15 +49,15 @@ public class SalesDao {
 	 * 
 	 * @param 売上データオブジェクト
 	 * @return Enum データベースへの登録が成功したか、登録しようとする商品が既に削除されたか 商品が当日に既に登録されたかを判定する
-	 * @exception SQLException
+	 * @throws CustomException 
 	 */
-	public static Status persistSalesData(Sales sales) throws SQLException {
+	public static Status persistSalesData(Sales sales) throws CustomException {
 
 		String getProductCodeQuery = "SELECT product_code FROM m_product WHERE delete_datetime IS NULL AND product_name='"
 				+ sales.getProduct().getName() + "'";
 		String checkSalesExistTodayQuery = "SELECT * FROM t_sales WHERE product_code=? AND register_datetime=?";
-		String insertQuery = "INSERT INTO t_sales" + "(product_code,quantity,register_datetime,update_datetime)"
-				+ " VALUES((SELECT product_code FROM m_product WHERE product_name=?),?,?,?)";
+		String insertQuery = "INSERT INTO t_sales (product_code,quantity,register_datetime,update_datetime)"
+				+ " VALUES(?,?,?,?)";
 
 		try (Connection connection = DriverManager.getConnection(jdbcUrl, jdbcUsername, jdbcPassword)) {
 
@@ -98,7 +99,7 @@ public class SalesDao {
 							String updateDatetime = sales.getUpdateDatetime()
 									.format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
 
-							insertStatement.setString(1, sales.getProduct().getName());
+							insertStatement.setInt(1, productCode);
 							insertStatement.setInt(2, sales.getQuantity());
 							insertStatement.setString(3, registerDatetime);
 							insertStatement.setString(4, updateDatetime);
@@ -112,25 +113,24 @@ public class SalesDao {
 							}
 						}
 					} catch (SQLException e) {
-						throw new SQLException("売上テーブルにデータを登録しようとする際、予期しない問題が発生しました。");
+						throw new CustomException("売上テーブルにデータを登録しようとする際、予期しない問題が発生しました。");
 					}
 				}
 
-			} catch (SQLException e) {
-				throw new SQLException(e.getMessage());
+			} catch (SQLException | CustomException e) {
+				throw new CustomException(e.getMessage());
 			}
 
-		} catch (SQLException e) {
-			throw new SQLException(e.getMessage());
+		} catch (SQLException | CustomException e) {
+			throw new CustomException(e.getMessage());
 		}
 	}
 
 	/**
 	 * データベースから現在発生した既存の売上データを取得する
-	 * 
-	 * @exception SQLException
+	 * @throws CustomException 
 	 */
-	public static List<Sales> getExistingSales(String registerDatetime) throws SQLException {
+	public static List<Sales> getExistingSales(String registerDatetime) throws CustomException {
 
 		return SalesDao.getAllSalesList("SELECT * FROM t_sales WHERE register_datetime='" + registerDatetime + "'");
 	}
@@ -139,9 +139,9 @@ public class SalesDao {
 	 * 売上テーブルの全件を取得する
 	 * 
 	 * @return List of Sales 売上データオブジェクトが格納されたリスト
-	 * @exception SQLException
+	 * @throws CustomException 
 	 */
-	public static List<Sales> getAllSalesList() throws SQLException {
+	public static List<Sales> getAllSalesList() throws CustomException {
 		return SalesDao.getAllSalesList("SELECT * FROM t_sales");
 	}
 
@@ -151,8 +151,9 @@ public class SalesDao {
 	 * @param 種類の違うQuery文字列
 	 * @return List of Sales 売上データオブジェクトが格納されたリスト
 	 * @exception SQLException
+	 * @throws CustomException 
 	 */
-	private static List<Sales> getAllSalesList(String selectQuery) throws SQLException {
+	private static List<Sales> getAllSalesList(String selectQuery) throws CustomException {
 
 		List<Sales> allSales = new ArrayList<>();
 
@@ -184,7 +185,7 @@ public class SalesDao {
 			}
 
 		} catch (SQLException e) {
-			throw new SQLException("売上テーブルからデータを取得しようとする際、予期しない問題が発生しました。");
+			throw new CustomException("売上テーブルからデータを取得しようとする際、予期しない問題が発生しました。");
 		}
 		return allSales;
 	}
@@ -194,9 +195,9 @@ public class SalesDao {
 	 * 
 	 * @param 商品名と数量
 	 * @return 更新処理が成功したかを判定できる論理値
-	 * @exception SQLException
+	 * @exception CustomException
 	 */
-	public static boolean updateSalesData(String productName, Integer quantity) throws SQLException {
+	public static boolean updateSalesData(String productName, Integer quantity) throws CustomException {
 
 		boolean isUpdated = false;
 		String updateQuery = "UPDATE t_sales SET quantity=?,update_datetime=?,version=? WHERE sales_id=?"
@@ -243,10 +244,10 @@ public class SalesDao {
 					connection.rollback();
 
 			} catch (SQLException e) {
-				throw new SQLException("データベースへの接続の際、問題が発生しました。");
+				throw new CustomException("データベースへの接続の際、問題が発生しました。");
 			}
-		} catch (SQLException e) {
-			throw new SQLException(e.getMessage());
+		} catch (SQLException | CustomException e) {
+			throw new CustomException(e.getMessage());
 		}
 		return isUpdated;
 	}
@@ -257,9 +258,9 @@ public class SalesDao {
 	 * 両方のCsvファイルを作成する
 	 * @param 種類の違うQuery文字列、ファイルPath
 	 * @return void
-	 * @exception SQLException,IOException
+	 * @exception CustomException
 	 */
-	public static void createCSV(String query, File path) throws SQLException {
+	public static void createCSV(String query, File path) throws CustomException {
 
 		try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(path)), true);
 				Connection connection = DriverManager.getConnection(jdbcUrl, jdbcUsername, jdbcPassword);
@@ -274,9 +275,9 @@ public class SalesDao {
 
 		} catch (IOException | SQLException e) {
 			if (e instanceof IOException)
-				throw new RuntimeException("ファイル作成の際予期しない問題が発生しました。");
+				throw new CustomException("ファイル作成の際予期しない問題が発生しました。");
 			else
-				throw new SQLException("データベースへの接続の際、問題が発生しました。");
+				throw new CustomException("データベースへの接続の際、問題が発生しました。");
 		}
 	}
 }

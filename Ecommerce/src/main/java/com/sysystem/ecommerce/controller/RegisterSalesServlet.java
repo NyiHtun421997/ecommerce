@@ -1,7 +1,6 @@
 package com.sysystem.ecommerce.controller;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -14,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.sysystem.ecommerce.exception.CustomException;
 import com.sysystem.ecommerce.repository.SalesDao;
 import com.sysystem.ecommerce.service.SalesManager;
 
@@ -40,7 +40,7 @@ public class RegisterSalesServlet extends HttpServlet {
 			session.setAttribute("allProductNames", salesManager.getActiveProductNames());
 			session.setAttribute("newSales", new LinkedHashMap<>());
 			requestDispatcher.forward(request, response);
-		} catch (SQLException e) {
+		} catch (CustomException e) {
 			new RuntimeException(e.getMessage());
 		}
 	}
@@ -83,7 +83,7 @@ public class RegisterSalesServlet extends HttpServlet {
 				session.setAttribute("existingSales", salesManager.getExistingSales());
 				session.setAttribute("newSales", newSales);
 				requestDispatcher.forward(request, response);
-			} catch (SQLException e) {
+			} catch (CustomException e) {
 				new RuntimeException(e.getMessage());
 			}
 
@@ -138,10 +138,12 @@ public class RegisterSalesServlet extends HttpServlet {
 					
 					session.setAttribute("message", message);
 					session.setAttribute("productDeletedMessage", productDeletedMessage);
+					// 登録が成功したことをユーザー知らせる
+					session.setAttribute("isUpdated", isRegistered);
 					
 					doGet(request, response);
 				}
-			} catch (SQLException e) {
+			} catch (CustomException e) {
 				new RuntimeException(e.getMessage());
 			}
 		}

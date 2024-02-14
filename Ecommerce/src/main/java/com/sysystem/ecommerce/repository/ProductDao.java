@@ -11,6 +11,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sysystem.ecommerce.exception.CustomException;
 import com.sysystem.ecommerce.model.Product;
 
 /**
@@ -40,10 +41,9 @@ public class ProductDao {
 
 	/**
 	 * 商品マスタと売上テーブルのデータを全件削除
-	 * 
-	 * @exception SQLException
+	 * @throws CustomException 
 	 */
-	public static void deleteAllData() throws SQLException {
+	public static void deleteAllData() throws CustomException {
 
 		String allProductQuery = "SELECT * FROM m_product";
 		String allSalesQuery = "SELECT * FROM t_sales WHERE product_code=";
@@ -77,7 +77,7 @@ public class ProductDao {
 							deleteSalesStatement.executeUpdate();
 						}
 					} catch (SQLException e) {
-						throw new SQLException("商売上データを削除しようとする際、予期しない問題が発生しました。");
+						throw new CustomException("商売上データを削除しようとする際、予期しない問題が発生しました。");
 					}
 
 					// 商品テーブルのレコードが削除できるようになる
@@ -88,12 +88,12 @@ public class ProductDao {
 				System.out.println("商品マスタのデータを削除しました。");
 				System.out.println("\n売上テーブルのデータを削除しました。");
 
-			} catch (SQLException e) {
-				throw new SQLException(e.getMessage());
+			} catch (SQLException | CustomException e) {
+				throw new CustomException(e.getMessage());
 			}
 
-		} catch (SQLException e) {
-			throw new SQLException(e.getMessage());
+		} catch (SQLException | CustomException e) {
+			throw new CustomException(e.getMessage());
 		}
 	}
 
@@ -102,33 +102,43 @@ public class ProductDao {
 	 * 
 	 * @param 商品オブジェクト
 	 * @return boolean値 データベースへの登録が成功したかを判定する
-	 * @exception SQLException
+	 * @throws CustomException 
 	 */
-	public static boolean registerProductData(Product product) throws SQLException {
+	public static boolean registerProductData(Product product) throws CustomException {
 		boolean isRegistered = false;
+		String searchProductQuery = "SELECT product_name FROM m_product WHERE product_name='" + product.getName() + "'";
 		String insertQuery = "INSERT INTO m_product "
 				+ "(product_code,product_name,price,register_datetime,update_datetime,delete_datetime)"
 				+ "VALUES(?,?,?,?,?,NULL)";
 
 		try (Connection connection = DriverManager.getConnection(jdbcUrl, jdbcUsername, jdbcPassword);
-				PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
+				PreparedStatement searchProductStatement = connection.prepareStatement(searchProductQuery);
+				PreparedStatement insertStatement = connection.prepareStatement(insertQuery);
+				ResultSet searchProductResult = searchProductStatement.executeQuery()) {
 
-			String registerDatetime = product.getRegisterDatetime()
-					.format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+			// 既に存在する商品かチェック
+			if (searchProductResult.next()) {
+				throw new CustomException("既に存在する商品です。");
+			}
+				
+			else {
+				String registerDatetime = product.getRegisterDatetime()
+						.format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
 
-			String updateDatetime = product.getUpdateDatetime()
-					.format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+				String updateDatetime = product.getUpdateDatetime()
+						.format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
 
-			preparedStatement.setInt(1, product.getCode());
-			preparedStatement.setString(2, product.getName());
-			preparedStatement.setInt(3, product.getPrice());
-			preparedStatement.setString(4, registerDatetime);
-			preparedStatement.setString(5, updateDatetime);
+				insertStatement.setInt(1, product.getCode());
+				insertStatement.setString(2, product.getName());
+				insertStatement.setInt(3, product.getPrice());
+				insertStatement.setString(4, registerDatetime);
+				insertStatement.setString(5, updateDatetime);
 
-			isRegistered = preparedStatement.executeUpdate() > 0;
+				isRegistered = insertStatement.executeUpdate() > 0;
+			}			
 
 		} catch (SQLException e) {
-			throw new SQLException("商品マスタテーブルにデータを登録しようとする際、予期しない問題が発生しました。");
+			throw new CustomException("商品マスタテーブルにデータを登録しようとする際、予期しない問題が発生しました。");
 		}
 		return isRegistered;
 	}
@@ -138,9 +148,9 @@ public class ProductDao {
 	/**
 	 * 商品マスターテーブルの全件を取得する
 	 * @return List of Products 商品オブジェクトが格納されたリスト
-	 * @exception SQLException
+	 * @exception CustomException
 	 */
-	public static List<Product> getAllProducts() throws SQLException {
+	public static List<Product> getAllProducts() throws CustomException {
 		return ProductDao.getProducts("SELECT * FROM m_product");
 	}
 
@@ -148,9 +158,9 @@ public class ProductDao {
 	 * 商品マスターテーブルの全件を取得する
 	 * @param 商品名の一部で検索するため、商品名の一部文字列
 	 * @return List of Products 商品オブジェクトが格納されたリスト、商品コードの昇順にソート
-	 * @exception SQLException
+	 * @exception CustomException
 	 */
-	public static List<Product> searchActiveProductsOrderByCode(String searchWord) throws SQLException {
+	public static List<Product> searchActiveProductsOrderByCode(String searchWord) throws CustomException {
 		String searchQuery = "SELECT * FROM m_product WHERE product_name LIKE '%"
 				+ searchWord + "%'AND delete_datetime IS NULL"
 				+ " ORDER BY product_code";
@@ -162,9 +172,9 @@ public class ProductDao {
 	 * 商品マスターテーブルの全件を取得するprivateメゾット
 	 * @param 種類の違いselect query 文字列
 	 * @return List of Products 商品オブジェクトが格納されたリスト
-	 * @exception SQLException
+	 * @exception CustomException
 	 */
-	private static List<Product> getProducts(String selectQuery) throws SQLException {
+	private static List<Product> getProducts(String selectQuery) throws CustomException {
 
 		List<Product> allProducts = new ArrayList<>();
 
@@ -196,7 +206,7 @@ public class ProductDao {
 			}
 
 		} catch (SQLException e) {
-			throw new SQLException("商品マスターテーブルからデータを取得しようとする際、予期しない問題が発生しました。");
+			throw new CustomException("商品マスターテーブルからデータを取得しようとする際、予期しない問題が発生しました。");
 		}
 		return allProducts;
 	}
@@ -204,9 +214,9 @@ public class ProductDao {
 	/**
 	 * 商品マスターテーブルから1つのレコードを取得する
 	 * @return Product 商品オブジェクト
-	 * @exception SQLException
+	 * @exception CustomException
 	 */
-	public static Product getProduct(int productCode) throws SQLException {
+	public static Product getProduct(int productCode) throws CustomException {
 
 		Product product = null;
 		String selectQuery = "SELECT * FROM m_product WHERE product_code=?";
@@ -238,11 +248,11 @@ public class ProductDao {
 					product = new Product(productCode, name, price, registerDatetime, updateDatetime, deleteDatetime);
 				}
 			} catch (SQLException e) {
-				throw new SQLException("商品マスターテーブルからデータを取得しようとする際、予期しない問題が発生しました。");
+				throw new CustomException("商品マスターテーブルからデータを取得しようとする際、予期しない問題が発生しました。");
 			}
 
-		} catch (SQLException e) {
-			throw new SQLException(e.getMessage());
+		} catch (SQLException | CustomException e) {
+			throw new CustomException(e.getMessage());
 		}
 		return product;
 	}
@@ -250,9 +260,9 @@ public class ProductDao {
 	/**
 	 * 商品テーブルから現在最大のproduct codeを取得する
 	 * @return int 現在最大のproduct code
-	 * @exception SQLException
+	 * @exception CustomException
 	 */
-	public static int getMaxProductCode() throws SQLException {
+	public static int getMaxProductCode() throws CustomException {
 		int maxProductCode = -1;
 		String maxProductCodeQuery = "SELECT MAX(product_code) FROM m_product";
 
@@ -263,7 +273,7 @@ public class ProductDao {
 			resultSet.next();
 			maxProductCode = resultSet.getInt(1);
 		} catch (SQLException e) {
-			throw new SQLException("データベースへの接続の際、問題が発生しました。");
+			throw new CustomException("データベースへの接続の際、問題が発生しました。");
 		}
 		return maxProductCode;
 	}
@@ -272,9 +282,9 @@ public class ProductDao {
 	 * 商品マスタのデータを編集
 	 * @param 商品コード、商品名、単価
 	 * @return boolean 編集が成功したかを指す論理値
-	 * @exception SQLException
+	 * @exception CustomException
 	 */
-	public static boolean updateProductData(int productCode, String productName, int price) throws SQLException {
+	public static boolean updateProductData(int productCode, String productName, int price) throws CustomException {
 		return ProductDao.editProductData(true, productCode, productName, price);
 	}
 
@@ -283,9 +293,9 @@ public class ProductDao {
 	 * @param 商品コード、商品名、単価
 	 * @param 変更か削除かを判定するbooleanが型論理値、商品コード、商品名、単価（削除の場合null）
 	 * @return boolean 編集が成功したかを指す論理値
-	 * @exception SQLException
+	 * @exception CustomException
 	 */
-	public static boolean deleteProductData(int productCode) throws SQLException {
+	public static boolean deleteProductData(int productCode) throws CustomException {
 		return ProductDao.editProductData(false, productCode, null, 0);
 	}
 
@@ -293,10 +303,10 @@ public class ProductDao {
 	 * 商品マスタのデータを編集または削除
 	 * @param 変更か削除かを判定するbooleanが型論理値、商品コード、商品名、単価（削除の場合null,0）
 	 * @return boolean 編集が成功したかを指す論理値
-	 * @exception SQLException
+	 * @exception CustomException
 	 */
 	private static boolean editProductData(boolean isUpdate, int productCode, String productName, int price)
-			throws SQLException {
+			throws CustomException {
 
 		boolean isEdited = false;
 		String editQuery = "UPDATE m_product SET delete_datetime=?,update_datetime=?,version=? WHERE product_code=? AND version=?";
@@ -363,14 +373,14 @@ public class ProductDao {
 					connection.commit();
 				} else {
 					connection.rollback();
-					throw new SQLException("変更・削除の作業は失敗しました。(Rollback)");
+					throw new CustomException("変更・削除の作業は失敗しました。(Rollback)");
 				}
-			} catch (SQLException e) {
-				throw new SQLException(e.getMessage());
+			} catch (SQLException | CustomException e) {
+				throw new CustomException(e.getMessage());
 			}
 
-		} catch (SQLException e) {
-			throw new SQLException(e.getMessage());
+		} catch (SQLException | CustomException e) {
+			throw new CustomException(e.getMessage());
 		}
 		return isEdited;
 	}
@@ -378,9 +388,9 @@ public class ProductDao {
 	/**
 	 * 商品は既にに売上が発生したかを判定する
 	 * @param 商品コード
-	 * @exception SQLException
+	 * @exception CustomException
 	 */
-	public static boolean isProductSold(int productCode) throws SQLException {
+	public static boolean isProductSold(int productCode) throws CustomException {
 		String query = "SELECT COUNT(*) FROM t_sales WHERE product_code=" + productCode;
 		boolean isSold = false;
 
@@ -393,7 +403,7 @@ public class ProductDao {
 					isSold = true;
 			}
 		} catch (SQLException e) {
-			throw new SQLException("データベースへの接続の際、問題が発生しました。");
+			throw new CustomException("データベースへの接続の際、問題が発生しました。");
 		}
 		return isSold;
 	}

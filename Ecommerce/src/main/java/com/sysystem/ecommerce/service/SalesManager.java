@@ -1,7 +1,6 @@
 package com.sysystem.ecommerce.service;
 
 import java.io.File;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
@@ -10,6 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import com.sysystem.ecommerce.exception.CustomException;
 import com.sysystem.ecommerce.model.Product;
 import com.sysystem.ecommerce.model.Sales;
 import com.sysystem.ecommerce.repository.ProductDao;
@@ -29,9 +29,9 @@ public class SalesManager {
 	/**
 	 * データベースから現在発生した既存の売上データを取得する
 	 * @return 既に発生した売上データをMap->売上Id,InnerMap
-	 * @throws SQLException
+	 * @throws CustomException 
 	 */
-	public Map<String, Integer> getExistingSales() throws SQLException {
+	public Map<String, Integer> getExistingSales() throws CustomException {
 		String registerDatetime = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 		List<Sales> allExistingSales = SalesDao.getExistingSales(registerDatetime);
 		return allExistingSales.stream()
@@ -43,9 +43,9 @@ public class SalesManager {
 	 * データベースから商品名のリストを取得する
 	 * 
 	 * @return 削除されていない商品名のリスト
-	 * @throws SQLException
+	 * @throws CustomException
 	 */
-	public List<String> getActiveProductNames() throws SQLException {
+	public List<String> getActiveProductNames() throws CustomException {
 		List<Product> allProducts = ProductDao.searchActiveProductsOrderByCode("");
 		return allProducts.stream().map(Product::getName).collect(Collectors.toList());
 	}
@@ -54,9 +54,9 @@ public class SalesManager {
 	 * データベースに売上を登録する
 	 * @param 登録したい売上データを商品名 key, 数量 value のMap
 	 * @return 登録処理後更新処理が必要な売上データ及び削除された商品のため登録できないという情報が含まれているMap
-	 * @throws SQLException
+	 * @throws CustomException
 	 */
-	public Map<String, Integer> registerSales(Map<String, Integer> salesToRegister) throws SQLException {
+	public Map<String, Integer> registerSales(Map<String, Integer> salesToRegister) throws CustomException {
 		// このMapは売上登録処理後のStatusを保存する
 		Map<String, Integer> salesRegisterStatusMap = new LinkedHashMap<>();
 		// 商品名＋数量 key,value pair毎にSalesオブジェクトを作成してデータベースに登録する
@@ -96,9 +96,9 @@ public class SalesManager {
 	 * データベースに売上を更新する
 	 * @param 更新したい売上データを商品名 key, 数量 value のMap
 	 * @return 更新処理の結果を示す論理値
-	 * @throws SQLException
+	 * @throws CustomException
 	 */
-	public boolean updateSales(Map<String, Integer> salesToUpdate) throws SQLException {
+	public boolean updateSales(Map<String, Integer> salesToUpdate) throws CustomException {
 		boolean result = true;
 		
 		for (Entry<String, Integer> entry : salesToUpdate.entrySet()) {
@@ -111,9 +111,9 @@ public class SalesManager {
 	/**
 	 * 商品ごとの売上集計。売上のない商品も含める売上レコードも
 	 * @param root path to store csv files
-	 * @exception SQLException
+	 * @exception CustomException
 	 */
-	public void createAllSalesRecordCsv(String rootPath) throws SQLException {
+	public void createAllSalesRecordCsv(String rootPath) throws CustomException {
 		String query = "SELECT P.product_code,product_name,price,SUM(quantity) AS quantity,(price*SUM(quantity)) AS total_amount"
 				+ " FROM m_product AS P LEFT JOIN t_sales AS T ON P.product_code=T.product_code"
 				+ " GROUP BY P.product_code";
@@ -124,9 +124,9 @@ public class SalesManager {
 	/**
 	 * 指定した年月に売上のある商品の売上集計。売上のない商品は含めない
 	 * @param root path to store csv files, 指定した年月String
-	 * @exception SQLException
+	 * @exception CustomException
 	 */
-	public void createSalesRecordCsvSpecifiedDate(String rootPath, String date) throws SQLException {
+	public void createSalesRecordCsvSpecifiedDate(String rootPath, String date) throws CustomException {
 		String query = "SELECT P.product_code,product_name,price,SUM(quantity) AS quantity,(price*SUM(quantity)) AS total_amount"
 				+ " FROM m_product AS p JOIN t_sales AS T ON P.product_code=T.product_code"
 				+ " WHERE T.register_datetime LIKE '" + date + "-%' OR T.update_datetime LIKE '" + date + "-%'"

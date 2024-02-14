@@ -1,7 +1,6 @@
 package com.sysystem.ecommerce.controller;
 
 import java.io.IOException;
-import java.sql.SQLException;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
@@ -11,6 +10,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.sysystem.ecommerce.exception.CustomException;
 import com.sysystem.ecommerce.repository.ProductDao;
 import com.sysystem.ecommerce.service.ProductManager;
 
@@ -56,7 +56,7 @@ public class RegisterProductServlet extends HttpServlet {
 			try {
 				productManager = ProductManager.getInstance();
 				isRegistered = productManager.registerProduct(productName, productPrice);
-			} catch (SQLException e) {
+			} catch (CustomException e) {
 				throw new RuntimeException(e.getMessage());
 			}
 

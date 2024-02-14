@@ -1,7 +1,6 @@
 package com.sysystem.ecommerce.controller;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.Map;
 
 import javax.servlet.ServletConfig;
@@ -12,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.sysystem.ecommerce.exception.CustomException;
 import com.sysystem.ecommerce.repository.SalesDao;
 import com.sysystem.ecommerce.service.SalesManager;
 
@@ -53,7 +53,7 @@ public class UpdateSalesServlet extends HttpServlet {
 				session.setAttribute("isUpdated", isUpdated);
 
 				response.sendRedirect("/Ecommerce/register_sales");
-			} catch (SQLException e) {
+			} catch (CustomException e) {
 				new RuntimeException(e.getMessage());
 			}
 		}
