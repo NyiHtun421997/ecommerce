@@ -45,34 +45,34 @@ public class Tran {
 		product5.setUpdateDatetime(LocalDate.of(2024, 1, 22));
 
 		// 売上テーブルにデータを登録
-		Sales sales1 = new Sales(product1, 5, 
+		Sales sales1 = new Sales(LocalDate.of(2023, 11, 30),product1, 5, 
 				LocalDate.of(2023, 11, 30), LocalDate.of(2024, 1, 4));
 
-		Sales sales2 = new Sales(product1, 7, 
+		Sales sales2 = new Sales(LocalDate.of(2023, 10, 12), product1, 7, 
 				LocalDate.of(2023, 10, 12), LocalDate.of(2024, 1, 14));
 
-		Sales sales3 = new Sales(product2, 6, 
+		Sales sales3 = new Sales(LocalDate.of(2022, 8, 27), product2, 6, 
 				LocalDate.of(2022, 8, 27), LocalDate.of(2024, 1, 6));
 
-		Sales sales4 = new Sales(product2, 2, 
+		Sales sales4 = new Sales(LocalDate.of(2023, 10, 11),product2, 2, 
 				LocalDate.of(2023, 11, 30), LocalDate.of(2024, 1, 4));
 
-		Sales sales5 = new Sales(product3, 5, 
+		Sales sales5 = new Sales(LocalDate.of(2023, 10, 11),product3, 5, 
 				LocalDate.of(2023, 10, 11), LocalDate.of(2024, 1, 17));
 
-		Sales sales6 = new Sales(product3, 7, 
+		Sales sales6 = new Sales(LocalDate.of(2023, 12, 22), product3, 7, 
 				LocalDate.of(2023, 12, 22), LocalDate.of(2024, 1, 9));
 
-		Sales sales7 = new Sales(product3, 4, 
+		Sales sales7 = new Sales(LocalDate.now(), product3, 4, 
 				LocalDate.now(), LocalDate.now());
 
-		Sales sales8 = new Sales(product4, 8, 
+		Sales sales8 = new Sales(LocalDate.of(2023, 7, 9), product4, 8, 
 				LocalDate.of(2023, 7, 9), LocalDate.of(2023, 12, 14));
 
-		Sales sales9 = new Sales(product4, 5, 
+		Sales sales9 = new Sales(LocalDate.of(2023, 10, 11), product4, 5, 
 				LocalDate.of(2023, 10, 11), LocalDate.of(2023, 11, 26));
 
-		Sales sales10 = new Sales(product5, 13, 
+		Sales sales10 = new Sales(LocalDate.of(2023, 10, 11), product5, 13, 
 				LocalDate.of(2023, 10, 11), LocalDate.of(2023, 11, 30));
 
 		try {
@@ -163,7 +163,7 @@ public class Tran {
 
 				if (sales.getRegisterDatetime() != null) {
 
-					Date registerDatetime = Date.valueOf(sales.getRegisterDatetime());
+					Date registerDatetime = Date.valueOf(sales.getSalesDate());
 					System.out.printf("%1$tY/%1$tm/%1$td%2$-11s", registerDatetime, " ");
 
 				} else {

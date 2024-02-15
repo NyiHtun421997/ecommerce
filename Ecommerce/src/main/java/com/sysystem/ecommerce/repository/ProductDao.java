@@ -62,11 +62,14 @@ public class ProductDao {
 
 			// 商品テーブルにある全てのレコードを取得する
 			try (ResultSet productResultSet = getAllProductsStatement.executeQuery(allProductQuery);) {
+				
 				while (productResultSet.next()) {
+					
 					// 商品テーブルのレコードが削除されるたびに
 					// その商品が関連する売上テーブルのレコードが削除されなければならない
-					// ProductResultSetからproduct codeを一つずつ取る
+					// ProductResultSetからproduct codeを一つずつ取る				
 					productCode = productResultSet.getInt("product_code");
+					
 					// product_codeがt_salesテーブルに外部キーとして存在するt_salesのレコードを取得する
 					try (ResultSet salesResultSet = getAllSalesStatement.executeQuery(allSalesQuery + productCode)) {
 
@@ -192,13 +195,13 @@ public class ProductDao {
 
 				LocalDate registerDatetime = null, updateDatetime = null, deleteDatetime = null;
 				if (registerDatetimeText != null && registerDatetimeText != "")
-					registerDatetime = LocalDate.parse(registerDatetimeText, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+					registerDatetime = LocalDate.parse(registerDatetimeText.substring(0, 10), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
 				if (updateDatetimeText != null && updateDatetimeText != "")
-					updateDatetime = LocalDate.parse(updateDatetimeText, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+					updateDatetime = LocalDate.parse(updateDatetimeText.substring(0, 10), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
 				if (deleteDatetimeText != null && deleteDatetimeText != "")
-					deleteDatetime = LocalDate.parse(deleteDatetimeText, DateTimeFormatter.ofPattern("yyyy-MMdd"));
+					deleteDatetime = LocalDate.parse(deleteDatetimeText.substring(0, 10), DateTimeFormatter.ofPattern("yyyy-MMdd"));
 
 				Product product = new Product(productCode, name, price, registerDatetime, updateDatetime,
 						deleteDatetime);
@@ -236,14 +239,14 @@ public class ProductDao {
 
 					LocalDate registerDatetime = null, updateDatetime = null, deleteDatetime = null;
 					if (registerDatetimeText != null && registerDatetimeText != "")
-						registerDatetime = LocalDate.parse(registerDatetimeText,
+						registerDatetime = LocalDate.parse(registerDatetimeText.substring(0, 10),
 								DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
 					if (updateDatetimeText != null && updateDatetimeText != "")
-						updateDatetime = LocalDate.parse(updateDatetimeText, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+						updateDatetime = LocalDate.parse(updateDatetimeText.substring(0, 10), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
 					if (deleteDatetimeText != null && deleteDatetimeText != "")
-						deleteDatetime = LocalDate.parse(deleteDatetimeText, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+						deleteDatetime = LocalDate.parse(deleteDatetimeText.substring(0, 10), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
 					product = new Product(productCode, name, price, registerDatetime, updateDatetime, deleteDatetime);
 				}

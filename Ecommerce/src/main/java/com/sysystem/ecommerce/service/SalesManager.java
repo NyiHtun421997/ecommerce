@@ -64,7 +64,7 @@ public class SalesManager {
 		
 		for (Entry<String, Integer> entry : salesToRegister.entrySet()) {
 			
-			Sales sales = new Sales(new Product(entry.getKey()), entry.getValue(), LocalDate.now(), LocalDate.now());
+			Sales sales = new Sales(LocalDate.now(),new Product(entry.getKey()), entry.getValue(), LocalDate.now(), LocalDate.now());
 			result  = SalesDao.persistSalesData(sales);
 			boolean isProductDeleted = false, isProductRegistered = false;
 			
@@ -129,8 +129,7 @@ public class SalesManager {
 	public void createSalesRecordCsvSpecifiedDate(String rootPath, String date) throws CustomException {
 		String query = "SELECT P.product_code,product_name,price,SUM(quantity) AS quantity,(price*SUM(quantity)) AS total_amount"
 				+ " FROM m_product AS p JOIN t_sales AS T ON P.product_code=T.product_code"
-				+ " WHERE T.register_datetime LIKE '" + date + "-%' OR T.update_datetime LIKE '" + date + "-%'"
-				+ " GROUP BY P.product_code;";
+				+ " WHERE T.sales_date LIKE '" + date + "-%' GROUP BY P.product_code;";
 		File path = new File(this.createFilePath(rootPath), "指定年月商品別売上集計_" + date + ".csv");
 		SalesDao.createCSV(query, path);
 	}

@@ -56,8 +56,8 @@ public class SalesDao {
 		String getProductCodeQuery = "SELECT product_code FROM m_product WHERE delete_datetime IS NULL AND product_name='"
 				+ sales.getProduct().getName() + "'";
 		String checkSalesExistTodayQuery = "SELECT * FROM t_sales WHERE product_code=? AND register_datetime=?";
-		String insertQuery = "INSERT INTO t_sales (product_code,quantity,register_datetime,update_datetime)"
-				+ " VALUES(?,?,?,?)";
+		String insertQuery = "INSERT INTO t_sales (sales_date,product_code,quantity,register_datetime,update_datetime)"
+				+ " VALUES(?,?,?,?,?)";
 
 		try (Connection connection = DriverManager.getConnection(jdbcUrl, jdbcUsername, jdbcPassword)) {
 
@@ -93,16 +93,20 @@ public class SalesDao {
 
 						} else {
 							// 登録処理を無難に続ける
+							String salesDate = sales.getSalesDate()
+									.format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+							
 							String registerDatetime = sales.getRegisterDatetime()
 									.format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
 
 							String updateDatetime = sales.getUpdateDatetime()
 									.format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
 
-							insertStatement.setInt(1, productCode);
-							insertStatement.setInt(2, sales.getQuantity());
-							insertStatement.setString(3, registerDatetime);
-							insertStatement.setString(4, updateDatetime);
+							insertStatement.setString(1, salesDate);
+							insertStatement.setInt(2, productCode);
+							insertStatement.setInt(3, sales.getQuantity());
+							insertStatement.setString(4, registerDatetime);
+							insertStatement.setString(5, updateDatetime);
 
 							if (insertStatement.executeUpdate() > 0) {
 								connection.commit();
@@ -163,19 +167,24 @@ public class SalesDao {
 
 			while (resultSet.next()) {
 				int id = resultSet.getInt("sales_id");
+				String salesDateText = resultSet.getString("sales_date");
 				int productCode = resultSet.getInt("product_code");
 				int quantity = resultSet.getInt("quantity");
 				String registerDatetimeText = resultSet.getString("register_datetime");
 				String updateDatetimeText = resultSet.getString("update_datetime");
 
-				LocalDate registerDatetime = null, updateDatetime = null;
+				LocalDate salesDate = null, registerDatetime = null, updateDatetime = null;
+				
+				if (salesDateText != null && salesDateText != "")
+					salesDate = LocalDate.parse(salesDateText.substring(0, 10), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+				
 				if (registerDatetimeText != null && registerDatetimeText != "")
-					registerDatetime = LocalDate.parse(registerDatetimeText, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+					registerDatetime = LocalDate.parse(registerDatetimeText.substring(0, 10), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
 				if (updateDatetimeText != null && updateDatetimeText != "")
-					updateDatetime = LocalDate.parse(updateDatetimeText, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+					updateDatetime = LocalDate.parse(updateDatetimeText.substring(0, 10), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
-				Sales sales = new Sales(id, null, quantity, registerDatetime, updateDatetime);
+				Sales sales = new Sales(id, salesDate, null, quantity, registerDatetime, updateDatetime);
 
 				// この売上データに関連する商品のオブジェクトを検索して作成する
 				Product product = ProductDao.getProduct(productCode);

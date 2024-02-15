@@ -13,15 +13,17 @@ public class Sales implements Serializable {
 	private static final long serialVersionUID = 2L;
 
 	private int id;
+	private LocalDate salesDate;
 	private Product product;
 	private int quantity;
 	private LocalDate registerDatetime;
 	private LocalDate updateDatetime;
 
 	// All Args Constructor
-	public Sales(int id, Product product, int quantity, LocalDate registerDatetime, LocalDate updateDatetime) {
+	public Sales(int id, LocalDate saleDate, Product product, int quantity, LocalDate registerDatetime, LocalDate updateDatetime) {
 		super();
 		this.id = id;
+		this.salesDate = saleDate;
 		this.product = product;
 		this.quantity = quantity;
 		this.registerDatetime = registerDatetime;
@@ -29,8 +31,9 @@ public class Sales implements Serializable {
 	}
 
 	// idなしConstructor
-	public Sales(Product product, int quantity, LocalDate registerDatetime, LocalDate updateDatetime) {
+	public Sales(LocalDate saleDate, Product product, int quantity, LocalDate registerDatetime, LocalDate updateDatetime) {
 		super();
+		this.salesDate = saleDate;
 		this.product = product;
 		this.quantity = quantity;
 		this.registerDatetime = registerDatetime;
@@ -50,6 +53,14 @@ public class Sales implements Serializable {
 
 	public void setId(int id) {
 		this.id = id;
+	}
+
+	public LocalDate getSalesDate() {
+		return salesDate;
+	}
+
+	public void setSalesDate(LocalDate salesDate) {
+		this.salesDate = salesDate;
 	}
 
 	public Product getProduct() {
