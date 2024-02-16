@@ -43,6 +43,22 @@ public class SalesDao {
 			System.out.println("ドライバーのロードが失敗しました。");
 		}
 	}
+	
+	/**
+	 *商品テーブルのデータを全件削除
+	 * @throws CustomException 
+	 */
+	public static void clearTable() throws CustomException {
+		String deleteQuery = "DELETE FROM t_sales";
+		try (Connection connection = DriverManager.getConnection(jdbcUrl, jdbcUsername, jdbcPassword);
+				PreparedStatement deleteStatement = connection.prepareStatement(deleteQuery)) {
+			
+			deleteStatement.executeUpdate();
+			
+		} catch (SQLException e) {
+			throw new CustomException("売上テーブルのデータを削除しようとする際、予期しない問題が発生しました。");
+		}
+	}
 
 	/**
 	 * 売上テーブルにデータを登録
@@ -55,7 +71,7 @@ public class SalesDao {
 
 		String getProductCodeQuery = "SELECT product_code FROM m_product WHERE delete_datetime IS NULL AND product_name='"
 				+ sales.getProduct().getName() + "'";
-		String checkSalesExistTodayQuery = "SELECT * FROM t_sales WHERE product_code=? AND register_datetime=?";
+		String checkSalesExistTodayQuery = "SELECT * FROM t_sales WHERE product_code=? AND sales_date=?";
 		String insertQuery = "INSERT INTO t_sales (sales_date,product_code,quantity,register_datetime,update_datetime)"
 				+ " VALUES(?,?,?,?,?)";
 
@@ -80,7 +96,7 @@ public class SalesDao {
 
 				} else {
 					productCode = productCodeResult.getInt(1);
-					// SELECT * FROM t_sales WHERE product_code=? AND register_datetime=?
+					// SELECT * FROM t_sales WHERE product_code=? AND sales_date=?
 					// 当日商品が売上テーブルに存在するか確認する
 					checkSalesExistTodayStatement.setInt(1, productCode);
 					checkSalesExistTodayStatement.setString(2,
@@ -136,7 +152,7 @@ public class SalesDao {
 	 */
 	public static List<Sales> getExistingSales(String registerDatetime) throws CustomException {
 
-		return SalesDao.getAllSalesList("SELECT * FROM t_sales WHERE register_datetime='" + registerDatetime + "'");
+		return SalesDao.getAllSalesList("SELECT * FROM t_sales WHERE sales_date='" + registerDatetime + "'");
 	}
 
 	/**

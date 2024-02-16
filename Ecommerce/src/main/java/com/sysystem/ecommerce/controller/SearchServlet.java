@@ -41,7 +41,7 @@ public class SearchServlet extends HttpServlet {
 				message = cookie.getValue();
 		}
 		
-		// 他の画面から検索画面に遷移する場合
+		// 編集画面から検索画面に遷移する場合
 		if (productName == null) {
 			productName = "";
 		}

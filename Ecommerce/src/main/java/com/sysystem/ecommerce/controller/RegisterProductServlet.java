@@ -43,7 +43,9 @@ public class RegisterProductServlet extends HttpServlet {
 
 		// 入力された値に無効な文字が入っているかチェックする
 		if (productName == "" || priceText == ""
-				|| productName.matches(".*[!@#%^&*()_+=\\[\\]{}|;':\",./<>?~`-].*")
+				|| productName.matches(".*[!！@＠#＃%％^＾&＆*＊(（)）＿_＋+"
+						+ "＝=［］\\[\\]｛｝{}｜|；;’'：:”\"，,．.／/"
+						+ "＜＞<>？?～~‘`－-].*")
 				|| !priceText.matches("[0-9]+")) {
 			message = "商品名または価格に無効な値が入力されています。";
 			request.setAttribute("message", message);

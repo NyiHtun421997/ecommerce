@@ -38,6 +38,22 @@ public class ProductDao {
 			System.out.println("ドライバーのロードが失敗しました。");
 		}
 	}
+	
+	/**
+	 * 商品マスタテーブルのデータを全件削除
+	 * @throws CustomException 
+	 */
+	public static void clearTable() throws CustomException {
+		String deleteQuery = "DELETE FROM m_product";
+		try (Connection connection = DriverManager.getConnection(jdbcUrl, jdbcUsername, jdbcPassword);
+				PreparedStatement deleteStatement = connection.prepareStatement(deleteQuery)) {
+			
+			deleteStatement.executeUpdate();
+			
+		} catch (SQLException e) {
+			throw new CustomException("商品テーブルのデータを削除しようとする際、予期しない問題が発生しました。");
+		}
+	}
 
 	/**
 	 * 商品マスタと売上テーブルのデータを全件削除
@@ -80,7 +96,7 @@ public class ProductDao {
 							deleteSalesStatement.executeUpdate();
 						}
 					} catch (SQLException e) {
-						throw new CustomException("商売上データを削除しようとする際、予期しない問題が発生しました。");
+						throw new CustomException("商品売上データを削除しようとする際、予期しない問題が発生しました。");
 					}
 
 					// 商品テーブルのレコードが削除できるようになる
@@ -131,7 +147,7 @@ public class ProductDao {
 				String updateDatetime = product.getUpdateDatetime()
 						.format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
 
-				insertStatement.setInt(1, product.getCode());
+				insertStatement.setString(1, String.valueOf(product.getCode()));
 				insertStatement.setString(2, product.getName());
 				insertStatement.setInt(3, product.getPrice());
 				insertStatement.setString(4, registerDatetime);

@@ -74,7 +74,7 @@ button {
 				<!-- 変更・削除処理が成功したというメッセージを次の画面に表示するためCookieに保管する -->
 				<%
 						Cookie cookie = new Cookie("message", message);
-						cookie.setMaxAge(30);
+						cookie.setMaxAge(3);
 						response.addCookie(cookie);
 						response.sendRedirect("/Ecommerce/search");
 				} 	else {

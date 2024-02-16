@@ -76,8 +76,12 @@ public class Tran {
 				LocalDate.of(2023, 10, 11), LocalDate.of(2023, 11, 30));
 
 		try {
-			// 商品マスタのデータを全件削除
-			ProductDao.deleteAllData();
+			// 商品マスタと売上テーブルのデータを全件削除
+			SalesDao.clearTable();
+			ProductDao.clearTable();
+			System.out.println("商品マスタのデータを削除しました。");
+			System.out.println("\n売上テーブルのデータを削除しました。");
+			
 			// 売上テーブルにデータを登録
 			if (ProductDao.registerProductData(product1)
 					&& ProductDao.registerProductData(product2)
