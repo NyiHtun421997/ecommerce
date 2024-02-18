@@ -23,7 +23,7 @@ public class ProductDao {
 
 	private static String jdbcDriver = "com.mysql.cj.jdbc.Driver";
 	private static String jdbcUrl = "jdbc:mysql://localhost:3306/exercise_b";
-	private static String jdbcUsername = "nnhsys";
+	private static String jdbcUsername = "nnhsyshd";
 	private static String jdbcPassword = "root";
 
 	/**

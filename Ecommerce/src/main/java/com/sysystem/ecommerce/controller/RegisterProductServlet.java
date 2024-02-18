@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.sysystem.ecommerce.exception.CustomException;
 import com.sysystem.ecommerce.repository.ProductDao;
+import com.sysystem.ecommerce.service.CleanseString;
 import com.sysystem.ecommerce.service.ProductManager;
 
 /**
@@ -53,6 +54,9 @@ public class RegisterProductServlet extends HttpServlet {
 			requestDispatcher = request.getRequestDispatcher("/register_product.jsp");
 			requestDispatcher.forward(request, response);
 		} else {
+			// 全角英数字を半額へ変更する
+			productName = CleanseString.apply(productName);
+			
 			int productPrice = Integer.parseInt(priceText);
 			ProductManager productManager = null;
 			try {

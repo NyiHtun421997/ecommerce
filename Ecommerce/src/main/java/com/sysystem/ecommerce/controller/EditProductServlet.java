@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.sysystem.ecommerce.exception.CustomException;
+import com.sysystem.ecommerce.service.CleanseString;
 import com.sysystem.ecommerce.service.ProductManager;
 
 /**
@@ -43,16 +44,17 @@ public class EditProductServlet extends HttpServlet {
 		RequestDispatcher requestDispatcher;
 
 		// 変更処理をする際入力された値に無効な文字が入っているかチェックする
-		if (edit.equals("update")
-				&& (productName == "" || priceText == ""
-						|| productName.matches(".*[!！@＠#＃%％^＾&＆*＊(（)）＿_＋+"
-								+ "＝=［］\\[\\]｛｝{}｜|；;’'：:”\"，,．.／/"
-								+ "＜＞<>？?～~‘`－-].*")
-						|| !priceText.matches("[0-9]+"))) {
+		if (edit.equals("update") && (productName == "" || priceText == ""
+				|| productName
+						.matches(".*[!！@＠#＃%％^＾&＆*＊(（)）＿_＋+" + "＝=［］\\[\\]｛｝{}｜|；;’'：:”\"，,．.／/" + "＜＞<>？?～~‘`－-].*")
+				|| !priceText.matches("[0-9]+"))) {
 
 			message = "商品名または価格に無効な値が入力されています。";
 
 		} else {
+			// 全角英数字を半額へ変更する
+			productName = CleanseString.apply(productName);
+			
 			try {
 				ProductManager productManager = ProductManager.getInstance();
 				// ここまで来たら入力値にspecial charactersか空白が入っていない為、編集処理を続ける
