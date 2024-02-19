@@ -28,7 +28,7 @@ public class SalesDao {
 
 	private static String jdbcDriver = "com.mysql.cj.jdbc.Driver";
 	private static String jdbcUrl = "jdbc:mysql://localhost:3306/exercise_b";
-	private static String jdbcUsername = "nnhsyshd";
+	private static String jdbcUsername = "nnhsys";
 	private static String jdbcPassword = "root";
 
 	/**
@@ -203,7 +203,7 @@ public class SalesDao {
 				Sales sales = new Sales(id, salesDate, null, quantity, registerDatetime, updateDatetime);
 
 				// この売上データに関連する商品のオブジェクトを検索して作成する
-				Product product = ProductDao.getProduct(productCode);
+				Product product = ProductDao.getProductByProductCode(productCode);
 				sales.setProduct(product);
 
 				allSales.add(sales);

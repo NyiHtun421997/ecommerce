@@ -1,5 +1,6 @@
 package com.sysystem.ecommerce.service;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 
 import com.sysystem.ecommerce.exception.CustomException;
@@ -41,45 +42,72 @@ public class ProductManager {
 
 	/**
 	 * 商品をデータベースに保存するメゾット
+	 * @return 処理の結果メッセージ
 	 * @param productName, productPrice
 	 * @throws CustomException 
 	 */
-	public boolean registerProduct(String productName, int productPrice) throws CustomException {
+	public String registerProduct(String productName, int productPrice) throws CustomException {
+
+		// 既に存在する商品の場合
+		if (ProductDao.getActiveProductByName(productName) != null)
+			return "登録失敗しました。既に存在する商品です。";
+
 		productCode++;
 		Product newProduct = new Product(productCode, productName, productPrice,
 				LocalDate.now(), LocalDate.now(), null);
-		return ProductDao.registerProductData(newProduct);
+
+		ProductDao.registerProductData(newProduct);
+		return "商品の登録が成功しました。";
 	}
-	
+
 	/**
 	 * 商品の変更処理
+	 * @return 処理の結果メッセージ
 	 * @param productCode, productName, productPrice
 	 * @throws CustomException 
 	 */
-	public boolean updateProductData(int productCode, String productName, int price) throws CustomException {
+	public String updateProductData(int productCode, String productName, int price) throws CustomException {
 		try {
 			// ここからこの商品は売上テーブルに関連しているかを検索する
-			if (!ProductDao.isProductSold(productCode)) {
-				// 商品が既に売上発生していない場合
-				return ProductDao.updateProductData(productCode, productName, price);
-			} else {
-				return false;
-			}
-		} catch (CustomException e) {
-			throw new CustomException(e.getMessage());
+			if (ProductDao.isProductSold(productCode))
+				return "変更失敗しました。既に販売中の商品です。";
+
+			// 同じ商品名があるか確認する
+			if (ProductDao.getActiveProductByName(productName) != null)
+				return "変更失敗しました。既に存在する商品です.";
+
+			// 商品が既に売上発生していない場合、変更処理を続ける
+			ProductDao.updateProductData(productCode, productName, price);
+			return "商品の変更が成功しました。";
+
+		} catch (SQLException | CustomException e) {
+			
+			if (e instanceof SQLException)
+				throw new CustomException(e.getMessage());
+			else
+				// rollback処理したことのメッセージ
+				return e.getMessage();
 		}
 	}
-	
+
 	/**
 	 * 商品の削除処理
+	 * @return 処理の結果メッセージ
 	 * @param productCode
 	 * @throws CustomException 
 	 */
-	public boolean deleteProductData(int productCode) throws CustomException {
+	public String deleteProductData(int productCode) throws CustomException {
 		try {
-			return ProductDao.deleteProductData(productCode);
-		} catch (CustomException e) {
-			throw new CustomException(e.getMessage());
+			ProductDao.deleteProductData(productCode);
+			return "商品の削除が成功しました。";
+
+		} catch (SQLException | CustomException e) {
+			
+			if (e instanceof SQLException)
+				throw new CustomException(e.getMessage());
+			else
+				// rollback処理したことのメッセージ
+				return e.getMessage();
 		}
 	}
 }

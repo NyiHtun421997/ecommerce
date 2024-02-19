@@ -46,7 +46,9 @@ public class EditProductServlet extends HttpServlet {
 		// 変更処理をする際入力された値に無効な文字が入っているかチェックする
 		if (edit.equals("update") && (productName == "" || priceText == ""
 				|| productName
-						.matches(".*[!！@＠#＃%％^＾&＆*＊(（)）＿_＋+" + "＝=［］\\[\\]｛｝{}｜|；;’'：:”\"，,．.／/" + "＜＞<>？?～~‘`－-].*")
+						.matches(".*[!！@＠#＃%％^＾&＆*＊(（)）＿_＋+"
+								+ "＝=［］\\[\\]｛｝{}｜|；;’'：:”\"，,．.／/"
+								+ "＜＞<>？?～~‘`￥\\－-].*")
 				|| !priceText.matches("[0-9]+"))) {
 
 			message = "商品名または価格に無効な値が入力されています。";
@@ -54,7 +56,7 @@ public class EditProductServlet extends HttpServlet {
 		} else {
 			// 全角英数字を半額へ変更する
 			productName = CleanseString.apply(productName);
-			
+
 			try {
 				ProductManager productManager = ProductManager.getInstance();
 				// ここまで来たら入力値にspecial charactersか空白が入っていない為、編集処理を続ける
@@ -62,13 +64,13 @@ public class EditProductServlet extends HttpServlet {
 				if (edit.equals("update")) {
 					// 変更の処理
 					int price = Integer.parseInt(priceText);
-					isEdited = productManager.updateProductData(productCode, productName, price);
-					message = (isEdited) ? "商品の変更が成功しました。" : "既に販売中の商品ですので変更処理が失敗しました。";
+					message = productManager.updateProductData(productCode, productName, price);
+					isEdited = (message.equals("商品の変更が成功しました。")) ? true : false;
 
 				} else {
 					// 削除の処理
-					isEdited = productManager.deleteProductData(productCode);
-					message = "商品の削除が成功しました。";
+					message = productManager.deleteProductData(productCode);
+					isEdited = (message.equals("商品の削除が成功しました。")) ? true : false;
 				}
 
 			} catch (CustomException e) {

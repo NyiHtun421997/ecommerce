@@ -33,8 +33,10 @@ public class SearchServlet extends HttpServlet {
 
 		RequestDispatcher requestDispatcher;
 		request.setCharacterEncoding("UTF-8");
+		
 		String productName = (String) request.getParameter("productName");
 		String message = "";
+		
 		Cookie[] cookies = request.getCookies();
 		for (Cookie cookie : cookies) {
 			if (cookie.getName().equals("message"))
@@ -42,12 +44,12 @@ public class SearchServlet extends HttpServlet {
 		}
 		
 		// 編集画面から検索画面に遷移する場合
-		if (productName == null) {
+		if (productName == null) 
 			productName = "";
-		}
 
 		try {
 			allProducts = ProductDao.searchActiveProductsOrderByCode(productName);
+			
 		} catch (CustomException e) {
 			throw new RuntimeException(e.getMessage());
 		}

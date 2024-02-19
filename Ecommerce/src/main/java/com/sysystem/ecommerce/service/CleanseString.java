@@ -1,13 +1,18 @@
 package com.sysystem.ecommerce.service;
 
-import com.ibm.icu.lang.CharacterProperties;
-import com.ibm.icu.lang.UProperty;
-import com.ibm.icu.util.CodePointMap;
-
 import static com.ibm.icu.lang.UCharacter.EastAsianWidth.*;
 
 import java.util.stream.Collectors;
 
+import com.ibm.icu.lang.CharacterProperties;
+import com.ibm.icu.lang.UProperty;
+import com.ibm.icu.util.CodePointMap;
+
+/**
+ * CleanseString Class 全角英数字を半角へ変更するサービスクラス
+ * 
+ * @author NyiNyiHtun
+ */
 public class CleanseString {
 
 	private static CodePointMap eastAsianWidthMap = CharacterProperties.getIntPropertyMap(UProperty.EAST_ASIAN_WIDTH);

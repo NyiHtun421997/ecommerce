@@ -23,7 +23,7 @@ public class ProductDao {
 
 	private static String jdbcDriver = "com.mysql.cj.jdbc.Driver";
 	private static String jdbcUrl = "jdbc:mysql://localhost:3306/exercise_b";
-	private static String jdbcUsername = "nnhsyshd";
+	private static String jdbcUsername = "nnhsys";
 	private static String jdbcPassword = "root";
 
 	/**
@@ -38,7 +38,7 @@ public class ProductDao {
 			System.out.println("ドライバーのロードが失敗しました。");
 		}
 	}
-	
+
 	/**
 	 * 商品マスタテーブルのデータを全件削除
 	 * @throws CustomException 
@@ -47,72 +47,11 @@ public class ProductDao {
 		String deleteQuery = "DELETE FROM m_product";
 		try (Connection connection = DriverManager.getConnection(jdbcUrl, jdbcUsername, jdbcPassword);
 				PreparedStatement deleteStatement = connection.prepareStatement(deleteQuery)) {
-			
+
 			deleteStatement.executeUpdate();
-			
+
 		} catch (SQLException e) {
 			throw new CustomException("商品テーブルのデータを削除しようとする際、予期しない問題が発生しました。");
-		}
-	}
-
-	/**
-	 * 商品マスタと売上テーブルのデータを全件削除
-	 * @throws CustomException 
-	 */
-	public static void deleteAllData() throws CustomException {
-
-		String allProductQuery = "SELECT * FROM m_product";
-		String allSalesQuery = "SELECT * FROM t_sales WHERE product_code=";
-
-		String productDeleteQuery = "DELETE FROM m_product WHERE product_code=?";
-		String salesDeleteQuery = "DELETE FROM t_sales WHERE sales_id=?";
-
-		int productCode, salesId;
-
-		// 商品マスターのデータを削除する
-		try (Connection connection = DriverManager.getConnection(jdbcUrl, jdbcUsername, jdbcPassword);
-				Statement getAllProductsStatement = connection.createStatement();
-				Statement getAllSalesStatement = connection.createStatement();
-				PreparedStatement deleteProductStatement = connection.prepareStatement(productDeleteQuery);
-				PreparedStatement deleteSalesStatement = connection.prepareStatement(salesDeleteQuery)) {
-
-			// 商品テーブルにある全てのレコードを取得する
-			try (ResultSet productResultSet = getAllProductsStatement.executeQuery(allProductQuery);) {
-				
-				while (productResultSet.next()) {
-					
-					// 商品テーブルのレコードが削除されるたびに
-					// その商品が関連する売上テーブルのレコードが削除されなければならない
-					// ProductResultSetからproduct codeを一つずつ取る				
-					productCode = productResultSet.getInt("product_code");
-					
-					// product_codeがt_salesテーブルに外部キーとして存在するt_salesのレコードを取得する
-					try (ResultSet salesResultSet = getAllSalesStatement.executeQuery(allSalesQuery + productCode)) {
-
-						// sales_idで検索してレコードごとを削除する
-						while (salesResultSet.next()) {
-							salesId = salesResultSet.getInt("sales_id");
-							deleteSalesStatement.setInt(1, salesId);
-							deleteSalesStatement.executeUpdate();
-						}
-					} catch (SQLException e) {
-						throw new CustomException("商品売上データを削除しようとする際、予期しない問題が発生しました。");
-					}
-
-					// 商品テーブルのレコードが削除できるようになる
-					deleteProductStatement.setInt(1, productCode);
-					deleteProductStatement.executeUpdate();
-				}
-
-				System.out.println("商品マスタのデータを削除しました。");
-				System.out.println("\n売上テーブルのデータを削除しました。");
-
-			} catch (SQLException | CustomException e) {
-				throw new CustomException(e.getMessage());
-			}
-
-		} catch (SQLException | CustomException e) {
-			throw new CustomException(e.getMessage());
 		}
 	}
 
@@ -135,34 +74,25 @@ public class ProductDao {
 				PreparedStatement insertStatement = connection.prepareStatement(insertQuery);
 				ResultSet searchProductResult = searchProductStatement.executeQuery()) {
 
-			// 既に存在する商品かチェック
-			if (searchProductResult.next()) {
-				throw new CustomException("既に存在する商品です。");
-			}
-				
-			else {
-				String registerDatetime = product.getRegisterDatetime()
-						.format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+			String registerDatetime = product.getRegisterDatetime()
+					.format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
 
-				String updateDatetime = product.getUpdateDatetime()
-						.format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+			String updateDatetime = product.getUpdateDatetime()
+					.format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
 
-				insertStatement.setString(1, String.valueOf(product.getCode()));
-				insertStatement.setString(2, product.getName());
-				insertStatement.setInt(3, product.getPrice());
-				insertStatement.setString(4, registerDatetime);
-				insertStatement.setString(5, updateDatetime);
+			insertStatement.setString(1, String.valueOf(product.getCode()));
+			insertStatement.setString(2, product.getName());
+			insertStatement.setInt(3, product.getPrice());
+			insertStatement.setString(4, registerDatetime);
+			insertStatement.setString(5, updateDatetime);
 
-				isRegistered = insertStatement.executeUpdate() > 0;
-			}			
+			isRegistered = insertStatement.executeUpdate() > 0;
 
 		} catch (SQLException e) {
 			throw new CustomException("商品マスタテーブルにデータを登録しようとする際、予期しない問題が発生しました。");
 		}
 		return isRegistered;
 	}
-
-	
 
 	/**
 	 * 商品マスターテーブルの全件を取得する
@@ -182,7 +112,7 @@ public class ProductDao {
 	public static List<Product> searchActiveProductsOrderByCode(String searchWord) throws CustomException {
 		String searchQuery = "SELECT * FROM m_product WHERE product_name LIKE '%"
 				+ searchWord + "%'AND delete_datetime IS NULL"
-				+ " ORDER BY product_code";
+				+ " ORDER BY product_id";
 
 		return ProductDao.getProducts(searchQuery);
 	}
@@ -211,13 +141,16 @@ public class ProductDao {
 
 				LocalDate registerDatetime = null, updateDatetime = null, deleteDatetime = null;
 				if (registerDatetimeText != null && registerDatetimeText != "")
-					registerDatetime = LocalDate.parse(registerDatetimeText.substring(0, 10), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+					registerDatetime = LocalDate.parse(registerDatetimeText.substring(0, 10),
+							DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
 				if (updateDatetimeText != null && updateDatetimeText != "")
-					updateDatetime = LocalDate.parse(updateDatetimeText.substring(0, 10), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+					updateDatetime = LocalDate.parse(updateDatetimeText.substring(0, 10),
+							DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
 				if (deleteDatetimeText != null && deleteDatetimeText != "")
-					deleteDatetime = LocalDate.parse(deleteDatetimeText.substring(0, 10), DateTimeFormatter.ofPattern("yyyy-MMdd"));
+					deleteDatetime = LocalDate.parse(deleteDatetimeText.substring(0, 10),
+							DateTimeFormatter.ofPattern("yyyy-MMdd"));
 
 				Product product = new Product(productCode, name, price, registerDatetime, updateDatetime,
 						deleteDatetime);
@@ -232,50 +165,72 @@ public class ProductDao {
 
 	/**
 	 * 商品マスターテーブルから1つのレコードを取得する
+	 * @param 商品名
 	 * @return Product 商品オブジェクト
 	 * @exception CustomException
 	 */
-	public static Product getProduct(int productCode) throws CustomException {
+	public static Product getActiveProductByName(String productName) throws CustomException {
+		String selectQuery = "SELECT * FROM m_product WHERE product_name='" + productName
+				+ "' AND delete_datetime IS NULL";
+		return ProductDao.getProduct(selectQuery);
+	}
+
+	/**
+	 * 商品マスターテーブルから1つのレコードを取得する
+	 * @param 商品コード
+	 * @return Product 商品オブジェクト
+	 * @exception CustomException
+	 */
+	public static Product getProductByProductCode(int productCode) throws CustomException {
+		String selectQuery = "SELECT * FROM m_product WHERE product_code='" + productCode + "'";
+		return ProductDao.getProduct(selectQuery);
+	}
+
+	/**
+	 * 商品マスターテーブルから1つのレコードを取得する
+	 * @param SQL Query
+	 * @return Product 商品オブジェクト
+	 * @exception CustomException
+	 */
+	private static Product getProduct(String selectQuery) throws CustomException {
 
 		Product product = null;
-		String selectQuery = "SELECT * FROM m_product WHERE product_code=?";
 
 		try (Connection connection = DriverManager.getConnection(jdbcUrl, jdbcUsername, jdbcPassword);
-				PreparedStatement preparedStatement = connection.prepareStatement(selectQuery)) {
+				PreparedStatement preparedStatement = connection.prepareStatement(selectQuery);
+				ResultSet resultSet = preparedStatement.executeQuery()) {
 
-			preparedStatement.setInt(1, productCode);
-			try (ResultSet resultSet = preparedStatement.executeQuery()) {
-				while (resultSet.next()) {
+			while (resultSet.next()) {
 
-					String name = resultSet.getString("product_name");
-					int price = resultSet.getInt("price");
-					String registerDatetimeText = resultSet.getString("register_datetime");
-					String updateDatetimeText = resultSet.getString("update_datetime");
-					String deleteDatetimeText = resultSet.getString("delete_datetime");
+				int productCode = Integer.parseInt(resultSet.getString("product_code"));
+				String name = resultSet.getString("product_name");
+				int price = resultSet.getInt("price");
+				String registerDatetimeText = resultSet.getString("register_datetime");
+				String updateDatetimeText = resultSet.getString("update_datetime");
+				String deleteDatetimeText = resultSet.getString("delete_datetime");
 
-					LocalDate registerDatetime = null, updateDatetime = null, deleteDatetime = null;
-					if (registerDatetimeText != null && registerDatetimeText != "")
-						registerDatetime = LocalDate.parse(registerDatetimeText.substring(0, 10),
-								DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+				LocalDate registerDatetime = null, updateDatetime = null, deleteDatetime = null;
+				if (registerDatetimeText != null && registerDatetimeText != "")
+					registerDatetime = LocalDate.parse(registerDatetimeText.substring(0, 10),
+							DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
-					if (updateDatetimeText != null && updateDatetimeText != "")
-						updateDatetime = LocalDate.parse(updateDatetimeText.substring(0, 10), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+				if (updateDatetimeText != null && updateDatetimeText != "")
+					updateDatetime = LocalDate.parse(updateDatetimeText.substring(0, 10),
+							DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
-					if (deleteDatetimeText != null && deleteDatetimeText != "")
-						deleteDatetime = LocalDate.parse(deleteDatetimeText.substring(0, 10), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+				if (deleteDatetimeText != null && deleteDatetimeText != "")
+					deleteDatetime = LocalDate.parse(deleteDatetimeText.substring(0, 10),
+							DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
-					product = new Product(productCode, name, price, registerDatetime, updateDatetime, deleteDatetime);
-				}
-			} catch (SQLException e) {
-				throw new CustomException("商品マスターテーブルからデータを取得しようとする際、予期しない問題が発生しました。");
+				product = new Product(productCode, name, price, registerDatetime, updateDatetime, deleteDatetime);
 			}
 
-		} catch (SQLException | CustomException e) {
-			throw new CustomException(e.getMessage());
+		} catch (SQLException e) {
+			throw new CustomException("商品マスターテーブルからデータを取得しようとする際、予期しない問題が発生しました。");
 		}
 		return product;
 	}
-		
+
 	/**
 	 * 商品テーブルから現在最大のproduct codeを取得する
 	 * @return int 現在最大のproduct code
@@ -302,8 +257,10 @@ public class ProductDao {
 	 * @param 商品コード、商品名、単価
 	 * @return boolean 編集が成功したかを指す論理値
 	 * @exception CustomException
+	 * @throws SQLException 
 	 */
-	public static boolean updateProductData(int productCode, String productName, int price) throws CustomException {
+	public static boolean updateProductData(int productCode, String productName, int price)
+			throws CustomException, SQLException {
 		return ProductDao.editProductData(true, productCode, productName, price);
 	}
 
@@ -313,8 +270,9 @@ public class ProductDao {
 	 * @param 変更か削除かを判定するbooleanが型論理値、商品コード、商品名、単価（削除の場合null）
 	 * @return boolean 編集が成功したかを指す論理値
 	 * @exception CustomException
+	 * @throws SQLException 
 	 */
-	public static boolean deleteProductData(int productCode) throws CustomException {
+	public static boolean deleteProductData(int productCode) throws CustomException, SQLException {
 		return ProductDao.editProductData(false, productCode, null, 0);
 	}
 
@@ -323,15 +281,16 @@ public class ProductDao {
 	 * @param 変更か削除かを判定するbooleanが型論理値、商品コード、商品名、単価（削除の場合null,0）
 	 * @return boolean 編集が成功したかを指す論理値
 	 * @exception CustomException
+	 * @throws SQLException 
 	 */
 	private static boolean editProductData(boolean isUpdate, int productCode, String productName, int price)
-			throws CustomException {
+			throws CustomException, SQLException {
 
 		boolean isEdited = false;
 		String editQuery = "UPDATE m_product SET delete_datetime=?,update_datetime=?,version=? WHERE product_code=? AND version=?";
 		// 削除の命令か判定する、falseの場合論理削除のqueryに変更する
 		if (isUpdate) {
-			editQuery = "UPDATE m_product SET product_name=?,price=?,update_datetime=?,version=? WHERE product_code=? AND version=?";		
+			editQuery = "UPDATE m_product SET product_name=?,price=?,update_datetime=?,version=? WHERE product_code=? AND version=?";
 		}
 
 		int prevVersion = 0;
@@ -354,23 +313,23 @@ public class ProductDao {
 				}
 
 				// 更新処理
-				if (isUpdate) {					
-						// product name
-						editStatement.setString(1, productName);
-						// price
-						editStatement.setInt(2, price);
-						// update datetime
-						String updateDatetime = LocalDate.now()
-								.format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
-						editStatement.setString(3, updateDatetime);
-						// new version
-						editStatement.setInt(4, prevVersion + 1);
-						// product code
-						editStatement.setInt(5, productCode);
-						// previous version
-						editStatement.setInt(6, prevVersion);
+				if (isUpdate) {
+					// product name
+					editStatement.setString(1, productName);
+					// price
+					editStatement.setInt(2, price);
+					// update datetime
+					String updateDatetime = LocalDate.now()
+							.format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+					editStatement.setString(3, updateDatetime);
+					// new version
+					editStatement.setInt(4, prevVersion + 1);
+					// product code
+					editStatement.setInt(5, productCode);
+					// previous version
+					editStatement.setInt(6, prevVersion);
 
-				// 削除処理
+					// 削除処理
 				} else {
 					// delete parameters
 					// delete datetime
@@ -395,11 +354,17 @@ public class ProductDao {
 					throw new CustomException("変更・削除の作業は失敗しました。(Rollback)");
 				}
 			} catch (SQLException | CustomException e) {
-				throw new CustomException(e.getMessage());
+				if (e instanceof SQLException)
+					throw new SQLException(e);
+				else
+					throw new CustomException(e.getMessage());
 			}
 
 		} catch (SQLException | CustomException e) {
-			throw new CustomException(e.getMessage());
+			if (e instanceof SQLException)
+				throw new SQLException(e);
+			else
+				throw new CustomException(e.getMessage());
 		}
 		return isEdited;
 	}

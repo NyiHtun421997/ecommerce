@@ -38,21 +38,26 @@ public class RegisterProductServlet extends HttpServlet {
 		request.setCharacterEncoding("UTF-8");
 		String productName = (String) request.getParameter("productName");
 		String priceText = (String) request.getParameter("price");
+		
 		String message = "";
 		boolean isRegistered = false;
+		
 		RequestDispatcher requestDispatcher;
 
 		// 入力された値に無効な文字が入っているかチェックする
 		if (productName == "" || priceText == ""
 				|| productName.matches(".*[!！@＠#＃%％^＾&＆*＊(（)）＿_＋+"
 						+ "＝=［］\\[\\]｛｝{}｜|；;’'：:”\"，,．.／/"
-						+ "＜＞<>？?～~‘`－-].*")
+						+ "＜＞<>？?～~‘`￥\\－-].*")
 				|| !priceText.matches("[0-9]+")) {
+			
 			message = "商品名または価格に無効な値が入力されています。";
 			request.setAttribute("message", message);
 			request.setAttribute("isRegistered", isRegistered);
+			
 			requestDispatcher = request.getRequestDispatcher("/register_product.jsp");
 			requestDispatcher.forward(request, response);
+			
 		} else {
 			// 全角英数字を半額へ変更する
 			productName = CleanseString.apply(productName);
@@ -61,12 +66,14 @@ public class RegisterProductServlet extends HttpServlet {
 			ProductManager productManager = null;
 			try {
 				productManager = ProductManager.getInstance();
-				isRegistered = productManager.registerProduct(productName, productPrice);
+				
+				message = productManager.registerProduct(productName, productPrice);
+				isRegistered = (message.equals("商品の登録が成功しました。")) ? true : false;
+				
 			} catch (CustomException e) {
 				throw new RuntimeException(e.getMessage());
 			}
 
-			message = "商品の登録が成功しました。";
 			request.setAttribute("message", message);
 			request.setAttribute("isRegistered", isRegistered);
 			requestDispatcher = request.getRequestDispatcher("/register_product.jsp");

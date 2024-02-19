@@ -24,11 +24,11 @@ public class Tran {
 		ProductDao.loadDriver();
 
 		// 商品マスタにデータを登録
-		Product product1 = new Product(1, "パソコンＰＣ", 130000, null, null, null);
+		Product product1 = new Product(1, "パソコンPC", 130000, null, null, null);
 		product1.setRegisterDatetime(LocalDate.now());
 		product1.setUpdateDatetime(LocalDate.now());
 
-		Product product2 = new Product(2, "デスクトップＰＣ", 150000, null, null, null);
+		Product product2 = new Product(2, "デスクトップPC", 150000, null, null, null);
 		product2.setRegisterDatetime(LocalDate.of(2017, 3, 13));
 		product2.setUpdateDatetime(LocalDate.of(2022, 6, 12));
 
@@ -165,10 +165,10 @@ public class Tran {
 			System.out.printf("%-18s%-18s%-18s%n", "売上日", "商品コード", "数量");
 			for (Sales sales : allSales) {
 
-				if (sales.getRegisterDatetime() != null) {
+				if (sales.getSalesDate() != null) {
 
-					Date registerDatetime = Date.valueOf(sales.getSalesDate());
-					System.out.printf("%1$tY/%1$tm/%1$td%2$-11s", registerDatetime, " ");
+					Date salesDate = Date.valueOf(sales.getSalesDate());
+					System.out.printf("%1$tY/%1$tm/%1$td%2$-11s", salesDate, " ");
 
 				} else {
 					System.out.printf("%-14s", " ");
