@@ -9,6 +9,12 @@
 <meta charset="UTF-8">
 <title>Register Sales</title>
 <style>
+	
+	header h1 {
+		font-size: 40px;
+		text-align: center;
+	}
+	
     #productName {
         margin-left: 48px;
         width: 200px;
@@ -60,7 +66,8 @@
 		String productDeletedMessage = ((productDeletedMessage = (String) session.getAttribute("productDeletedMessage")) == null) ? "" : productDeletedMessage;
 	%>
 	<header>
-		<h1 style="font-size:35px">売上登録</h1>
+		<a href="/Ecommerce/index.jsp" style="text-decoration: none; color: black;"><h1>商品管理システム</h1></a>
+		<h2 style="font-size:35px">売上登録</h2>
 	</header>
 	
 	<main>

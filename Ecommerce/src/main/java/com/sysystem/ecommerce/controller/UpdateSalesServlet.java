@@ -54,7 +54,7 @@ public class UpdateSalesServlet extends HttpServlet {
 
 				response.sendRedirect("/Ecommerce/register_sales");
 			} catch (CustomException e) {
-				new RuntimeException(e.getMessage());
+				throw new RuntimeException(e.getMessage());
 			}
 		}
 	}

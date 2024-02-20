@@ -21,10 +21,10 @@ import com.sysystem.ecommerce.model.Product;
  */
 public class ProductDao {
 
-	private static String jdbcDriver = "com.mysql.cj.jdbc.Driver";
-	private static String jdbcUrl = "jdbc:mysql://localhost:3306/exercise_b";
-	private static String jdbcUsername = "nnhsys";
-	private static String jdbcPassword = "root";
+	private static String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
+	private static String JDBC_URL = "jdbc:mysql://localhost:3306/exercise_b";
+	private static String JDBC_USERNAME = "nnhsys";
+	private static String JDBC_PASSWORD = "root";
 
 	/**
 	 * Mysql ドライバーのテストメゾット
@@ -33,7 +33,7 @@ public class ProductDao {
 	 */
 	public static void loadDriver() {
 		try {
-			Class.forName(jdbcDriver);
+			Class.forName(JDBC_DRIVER);
 		} catch (ClassNotFoundException e) {
 			System.out.println("ドライバーのロードが失敗しました。");
 		}
@@ -45,7 +45,7 @@ public class ProductDao {
 	 */
 	public static void clearTable() throws CustomException {
 		String deleteQuery = "DELETE FROM m_product";
-		try (Connection connection = DriverManager.getConnection(jdbcUrl, jdbcUsername, jdbcPassword);
+		try (Connection connection = DriverManager.getConnection(JDBC_URL, JDBC_USERNAME, JDBC_PASSWORD);
 				PreparedStatement deleteStatement = connection.prepareStatement(deleteQuery)) {
 
 			deleteStatement.executeUpdate();
@@ -69,7 +69,7 @@ public class ProductDao {
 				+ "(product_code,product_name,price,register_datetime,update_datetime,delete_datetime)"
 				+ "VALUES(?,?,?,?,?,NULL)";
 
-		try (Connection connection = DriverManager.getConnection(jdbcUrl, jdbcUsername, jdbcPassword);
+		try (Connection connection = DriverManager.getConnection(JDBC_URL, JDBC_USERNAME, JDBC_PASSWORD);
 				PreparedStatement searchProductStatement = connection.prepareStatement(searchProductQuery);
 				PreparedStatement insertStatement = connection.prepareStatement(insertQuery);
 				ResultSet searchProductResult = searchProductStatement.executeQuery()) {
@@ -127,7 +127,7 @@ public class ProductDao {
 
 		List<Product> allProducts = new ArrayList<>();
 
-		try (Connection connection = DriverManager.getConnection(jdbcUrl, jdbcUsername, jdbcPassword);
+		try (Connection connection = DriverManager.getConnection(JDBC_URL, JDBC_USERNAME, JDBC_PASSWORD);
 				PreparedStatement preparedStatement = connection.prepareStatement(selectQuery);
 				ResultSet resultSet = preparedStatement.executeQuery()) {
 
@@ -196,7 +196,7 @@ public class ProductDao {
 
 		Product product = null;
 
-		try (Connection connection = DriverManager.getConnection(jdbcUrl, jdbcUsername, jdbcPassword);
+		try (Connection connection = DriverManager.getConnection(JDBC_URL, JDBC_USERNAME, JDBC_PASSWORD);
 				PreparedStatement preparedStatement = connection.prepareStatement(selectQuery);
 				ResultSet resultSet = preparedStatement.executeQuery()) {
 
@@ -240,7 +240,7 @@ public class ProductDao {
 		int maxProductCode = -1;
 		String maxProductCodeQuery = "SELECT MAX(product_code) FROM m_product";
 
-		try (Connection connection = DriverManager.getConnection(jdbcUrl, jdbcUsername, jdbcPassword);
+		try (Connection connection = DriverManager.getConnection(JDBC_URL, JDBC_USERNAME, JDBC_PASSWORD);
 				PreparedStatement preparedStatement = connection.prepareStatement(maxProductCodeQuery);
 				ResultSet resultSet = preparedStatement.executeQuery()) {
 
@@ -294,7 +294,7 @@ public class ProductDao {
 		}
 
 		int prevVersion = 0;
-		try (Connection connection = DriverManager.getConnection(jdbcUrl, jdbcUsername, jdbcPassword)) {
+		try (Connection connection = DriverManager.getConnection(JDBC_URL, JDBC_USERNAME, JDBC_PASSWORD)) {
 
 			// Transactionを管理するため、auto commitをfalseにする
 			connection.setAutoCommit(false);
@@ -378,7 +378,7 @@ public class ProductDao {
 		String query = "SELECT COUNT(*) FROM t_sales WHERE product_code=" + productCode;
 		boolean isSold = false;
 
-		try (Connection connection = DriverManager.getConnection(jdbcUrl, jdbcUsername, jdbcPassword);
+		try (Connection connection = DriverManager.getConnection(JDBC_URL, JDBC_USERNAME, JDBC_PASSWORD);
 				Statement statement = connection.prepareStatement(query);
 				ResultSet resultSet = statement.executeQuery(query)) {
 

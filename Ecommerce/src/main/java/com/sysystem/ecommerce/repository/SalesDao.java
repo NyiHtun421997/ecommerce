@@ -2,9 +2,11 @@ package com.sysystem.ecommerce.repository;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -26,10 +28,10 @@ import com.sysystem.ecommerce.model.Sales;
  */
 public class SalesDao {
 
-	private static String jdbcDriver = "com.mysql.cj.jdbc.Driver";
-	private static String jdbcUrl = "jdbc:mysql://localhost:3306/exercise_b";
-	private static String jdbcUsername = "nnhsys";
-	private static String jdbcPassword = "root";
+	private static String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
+	private static String JDBC_URL = "jdbc:mysql://localhost:3306/exercise_b";
+	private static String JDBC_USERNAME = "nnhsys";
+	private static String JDBC_PASSWORD = "root";
 
 	/**
 	 * Mysql ドライバーのテストメゾット
@@ -38,23 +40,23 @@ public class SalesDao {
 	 */
 	public static void loadDriver() {
 		try {
-			Class.forName(jdbcDriver);
+			Class.forName(JDBC_DRIVER);
 		} catch (ClassNotFoundException e) {
 			System.out.println("ドライバーのロードが失敗しました。");
 		}
 	}
-	
+
 	/**
 	 *商品テーブルのデータを全件削除
 	 * @throws CustomException 
 	 */
 	public static void clearTable() throws CustomException {
 		String deleteQuery = "DELETE FROM t_sales";
-		try (Connection connection = DriverManager.getConnection(jdbcUrl, jdbcUsername, jdbcPassword);
+		try (Connection connection = DriverManager.getConnection(JDBC_URL, JDBC_USERNAME, JDBC_PASSWORD);
 				PreparedStatement deleteStatement = connection.prepareStatement(deleteQuery)) {
-			
+
 			deleteStatement.executeUpdate();
-			
+
 		} catch (SQLException e) {
 			throw new CustomException("売上テーブルのデータを削除しようとする際、予期しない問題が発生しました。");
 		}
@@ -75,7 +77,7 @@ public class SalesDao {
 		String insertQuery = "INSERT INTO t_sales (sales_date,product_code,quantity,register_datetime,update_datetime)"
 				+ " VALUES(?,?,?,?,?)";
 
-		try (Connection connection = DriverManager.getConnection(jdbcUrl, jdbcUsername, jdbcPassword)) {
+		try (Connection connection = DriverManager.getConnection(JDBC_URL, JDBC_USERNAME, "")) {
 
 			int productCode;
 			// Transactionを管理するため、auto commitをfalseにする
@@ -111,7 +113,7 @@ public class SalesDao {
 							// 登録処理を無難に続ける
 							String salesDate = sales.getSalesDate()
 									.format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
-							
+
 							String registerDatetime = sales.getRegisterDatetime()
 									.format(DateTimeFormatter.ofPattern("yyyy/MM/dd"));
 
@@ -133,7 +135,7 @@ public class SalesDao {
 							}
 						}
 					} catch (SQLException e) {
-						throw new CustomException("売上テーブルにデータを登録しようとする際、予期しない問題が発生しました。");
+						throw new CustomException(e.getMessage());
 					}
 				}
 
@@ -177,7 +179,7 @@ public class SalesDao {
 
 		List<Sales> allSales = new ArrayList<>();
 
-		try (Connection connection = DriverManager.getConnection(jdbcUrl, jdbcUsername, jdbcPassword);
+		try (Connection connection = DriverManager.getConnection(JDBC_URL, JDBC_USERNAME, JDBC_PASSWORD);
 				PreparedStatement preparedStatement = connection.prepareStatement(selectQuery);
 				ResultSet resultSet = preparedStatement.executeQuery()) {
 
@@ -190,15 +192,18 @@ public class SalesDao {
 				String updateDatetimeText = resultSet.getString("update_datetime");
 
 				LocalDate salesDate = null, registerDatetime = null, updateDatetime = null;
-				
+
 				if (salesDateText != null && salesDateText != "")
-					salesDate = LocalDate.parse(salesDateText.substring(0, 10), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-				
+					salesDate = LocalDate.parse(salesDateText.substring(0, 10),
+							DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
 				if (registerDatetimeText != null && registerDatetimeText != "")
-					registerDatetime = LocalDate.parse(registerDatetimeText.substring(0, 10), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+					registerDatetime = LocalDate.parse(registerDatetimeText.substring(0, 10),
+							DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
 				if (updateDatetimeText != null && updateDatetimeText != "")
-					updateDatetime = LocalDate.parse(updateDatetimeText.substring(0, 10), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+					updateDatetime = LocalDate.parse(updateDatetimeText.substring(0, 10),
+							DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
 				Sales sales = new Sales(id, salesDate, null, quantity, registerDatetime, updateDatetime);
 
@@ -210,7 +215,7 @@ public class SalesDao {
 			}
 
 		} catch (SQLException e) {
-			throw new CustomException("売上テーブルからデータを取得しようとする際、予期しない問題が発生しました。");
+			throw new CustomException(e.getMessage());
 		}
 		return allSales;
 	}
@@ -234,7 +239,7 @@ public class SalesDao {
 				+ "(SELECT product_code FROM m_product WHERE product_name='" + productName
 				+ "') AND register_datetime='" + todayDate + "'";
 
-		try (Connection connection = DriverManager.getConnection(jdbcUrl, jdbcUsername, jdbcPassword)) {
+		try (Connection connection = DriverManager.getConnection(JDBC_URL, JDBC_USERNAME, JDBC_PASSWORD)) {
 
 			// Transactionを管理するため、auto commitをfalseにする
 			connection.setAutoCommit(false);
@@ -269,10 +274,10 @@ public class SalesDao {
 					connection.rollback();
 
 			} catch (SQLException e) {
-				throw new CustomException("データベースへの接続の際、問題が発生しました。");
+				throw new CustomException(e.getMessage());
 			}
 		} catch (SQLException | CustomException e) {
-			throw new CustomException(e.getMessage());
+			throw new CustomException("データベースへの接続の際、問題が発生しました。");
 		}
 		return isUpdated;
 	}
@@ -287,8 +292,9 @@ public class SalesDao {
 	 */
 	public static void createCSV(String query, File path) throws CustomException {
 
-		try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(path)), true);
-				Connection connection = DriverManager.getConnection(jdbcUrl, jdbcUsername, jdbcPassword);
+		try (PrintWriter out = new PrintWriter(
+				new BufferedWriter(new OutputStreamWriter(new FileOutputStream(path, true), StandardCharsets.UTF_8)));
+				Connection connection = DriverManager.getConnection(JDBC_URL, JDBC_USERNAME, JDBC_PASSWORD);
 				PreparedStatement ps = connection.prepareStatement(query);
 				ResultSet rs = ps.executeQuery()) {
 
@@ -296,6 +302,7 @@ public class SalesDao {
 			while (rs.next()) {
 				out.append(rs.getInt("product_code") + "," + rs.getString("product_name") + "," + rs.getInt("price")
 						+ "," + rs.getInt("quantity") + "," + rs.getInt("total_amount") + "\n");
+				out.flush();
 			}
 
 		} catch (IOException | SQLException e) {

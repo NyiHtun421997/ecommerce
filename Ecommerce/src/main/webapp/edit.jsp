@@ -7,6 +7,12 @@
 <meta charset="UTF-8">
 <title>Edit Product</title>
 <style>
+
+header h1 {
+	font-size: 40px;
+	text-align: center;
+}
+
 label {
 	font-size: 30px;
 	vertical-align: middle;
@@ -48,7 +54,8 @@ button {
 		boolean isEdited = (request.getAttribute("isEdited") == null) ? false : (boolean)request.getAttribute("isEdited");
 	%>
 	<header>
-		<h1 style="font-size: 35px">商品変更・削除</h1>
+		<a href="/Ecommerce/index.jsp" style="text-decoration: none; color: black;"><h1>商品管理システム</h1></a>
+		<h2 style="font-size: 35px">商品変更・削除</h2>
 	</header>
 
 	<main>

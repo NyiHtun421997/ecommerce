@@ -7,6 +7,12 @@
 <meta charset="UTF-8">
 <title>Register Product</title>
 <style>
+
+header h1 {
+	font-size: 40px;
+	text-align: center;
+}
+
 #productName {
 	width: 500px;
 	height: 30px;
@@ -44,7 +50,10 @@ button {
 		String message = ((message = (String) request.getAttribute("message")) == null) ? "" : message;
 		boolean isRegistered = (request.getAttribute("isRegistered") == null) ? false : (boolean)request.getAttribute("isRegistered");
 	%>
-	<header style="font-size: 35px; font-weight: bold;">商品登録</header>
+	<header>
+		<a href="/Ecommerce/index.jsp" style="text-decoration: none; color: black;"><h1>商品管理システム</h1></a>
+		<h2 style="font-size: 35px; font-weight: bold;">商品登録</h2>
+	</header>
 
 	<main>
 		<form action="/Ecommerce/register_product" method="post">

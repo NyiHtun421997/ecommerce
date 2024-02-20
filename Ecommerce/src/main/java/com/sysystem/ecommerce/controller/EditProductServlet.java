@@ -22,11 +22,14 @@ public class EditProductServlet extends HttpServlet {
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		
 		request.setCharacterEncoding("UTF-8");
 		int productCode = Integer.parseInt((String) request.getParameter("product_code"));
 		String productName = (String) request.getParameter("product_name");
+		
 		request.setAttribute("productCode", productCode);
 		request.setAttribute("productName", productName);
+		
 		RequestDispatcher requestDispatcher = request.getRequestDispatcher("/edit.jsp");
 		requestDispatcher.forward(request, response);
 	}
@@ -35,12 +38,15 @@ public class EditProductServlet extends HttpServlet {
 			throws ServletException, IOException {
 
 		request.setCharacterEncoding("UTF-8");
+		
 		String productName = (String) request.getParameter("productName");
 		String priceText = (String) request.getParameter("price");
 		String edit = ((String) request.getParameter("edit"));
+		
 		String message = "";
 		boolean isEdited = false;
 		int productCode = Integer.parseInt((String) request.getParameter("productCode"));
+		
 		RequestDispatcher requestDispatcher;
 
 		// 変更処理をする際入力された値に無効な文字が入っているかチェックする

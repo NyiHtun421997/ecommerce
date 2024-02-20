@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
@@ -59,7 +60,7 @@ public class DownloadCSVServlet extends HttpServlet {
 
 				// Read the file
 				try (BufferedReader bufferedReader = new BufferedReader(
-						new InputStreamReader(new FileInputStream(filePath + fileName), "SJIS"));
+						new InputStreamReader(new FileInputStream(filePath + fileName), StandardCharsets.UTF_8));
 						PrintWriter out = response.getWriter()) {
 
 					String in;
@@ -67,7 +68,7 @@ public class DownloadCSVServlet extends HttpServlet {
 						out.println(in);
 					}
 				} catch (IOException e) {
-					throw new RuntimeException(e.getMessage());
+					throw new RuntimeException("ファイル作成の時、問題が発生しました。");
 				}
 
 			} else {
@@ -84,7 +85,7 @@ public class DownloadCSVServlet extends HttpServlet {
 
 				// Read the file
 				try (BufferedReader bufferedReader = new BufferedReader(
-						new InputStreamReader(new FileInputStream(filePath + fileName), "SJIS"));
+						new InputStreamReader(new FileInputStream(filePath + fileName), StandardCharsets.UTF_8));
 						PrintWriter out = response.getWriter()) {
 
 					String in;
@@ -92,7 +93,7 @@ public class DownloadCSVServlet extends HttpServlet {
 						out.println(in);
 					}
 				} catch (IOException e) {
-					throw new RuntimeException(e.getMessage());
+					throw new RuntimeException("ファイル作成の時、問題が発生しました。");
 				}
 			}
 

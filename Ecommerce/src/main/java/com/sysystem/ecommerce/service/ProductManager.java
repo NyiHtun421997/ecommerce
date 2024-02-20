@@ -83,7 +83,7 @@ public class ProductManager {
 		} catch (SQLException | CustomException e) {
 			
 			if (e instanceof SQLException)
-				throw new CustomException(e.getMessage());
+				throw new CustomException("接続が失敗しました。");
 			else
 				// rollback処理したことのメッセージ
 				return e.getMessage();

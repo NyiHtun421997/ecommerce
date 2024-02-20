@@ -34,15 +34,15 @@ public class RegisterSalesServlet extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		try {
-			RequestDispatcher requestDispatcher = request.getRequestDispatcher("/register_sales.jsp");
 			HttpSession session = request.getSession(true);
 			session.setAttribute("existingSales", salesManager.getExistingSales());
 			session.setAttribute("allProductNames", salesManager.getActiveProductNames());
 			session.setAttribute("newSales", new LinkedHashMap<>());
-			requestDispatcher.forward(request, response);
 		} catch (CustomException e) {
-			new RuntimeException(e.getMessage());
+			throw new RuntimeException(e.getMessage());
 		}
+		RequestDispatcher requestDispatcher = request.getRequestDispatcher("/register_sales.jsp");
+		requestDispatcher.forward(request, response);
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -82,10 +82,10 @@ public class RegisterSalesServlet extends HttpServlet {
 				session.setAttribute("allProductNames", salesManager.getActiveProductNames());
 				session.setAttribute("existingSales", salesManager.getExistingSales());
 				session.setAttribute("newSales", newSales);
-				requestDispatcher.forward(request, response);
 			} catch (CustomException e) {
-				new RuntimeException(e.getMessage());
+				throw new RuntimeException("接続が失敗しました。");
 			}
+			requestDispatcher.forward(request, response);
 
 		} else {
 			// 登録ボタンの場合
@@ -144,7 +144,7 @@ public class RegisterSalesServlet extends HttpServlet {
 					doGet(request, response);
 				}
 			} catch (CustomException e) {
-				new RuntimeException(e.getMessage());
+				throw new RuntimeException("接続が失敗しました。");
 			}
 		}
 
